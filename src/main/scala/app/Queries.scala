@@ -1,3 +1,5 @@
+package app
+
 object Queries {
 
   val baseQuery =

@@ -1,27 +1,25 @@
-import Queries.{baseQuery, humanCachedBatchedQuery, humanCachedQuery, humanDeferredQuery}
-import app.{Application, MyExecutionContext}
+import app.Application
+import app.Queries.baseQuery
 import io.circe.Json
-import org.slf4j.LoggerFactory
 import service.CreatureService
 
 import java.io.{BufferedWriter, File, FileWriter}
-import java.util.concurrent.Executors
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, Future}
 
 object Main extends App {
 
   private val app: Application = new Application
 
   private val res1: Future[Json] = app.graphql(baseQuery, None, None)
-//  private val res2: Future[Json] = app.graphql(humanDeferredQuery, None, None)
-//  private val res3: Future[Json] = app.graphql(humanCachedQuery, None, None)
-//  private val res4: Future[Json] = app.graphql(humanCachedBatchedQuery, None, None)
+  //  private val res2: Future[Json] = app.graphql(humanDeferredQuery, None, None)
+  //  private val res3: Future[Json] = app.graphql(humanCachedQuery, None, None)
+  //  private val res4: Future[Json] = app.graphql(humanCachedBatchedQuery, None, None)
 
   handleRes(res1, 1)
-//  handleRes(res2, 2)
-//  handleRes(res3, 3)
-//  handleRes(res4, 4)
+  //  handleRes(res2, 2)
+  //  handleRes(res3, 3)
+  //  handleRes(res4, 4)
 
   def handleResVerbose(res: Future[Json]) = {
     println("====================")
@@ -37,12 +35,13 @@ object Main extends App {
         .downField("tracing")
         .downField("duration")
         .focus
-        .foreach{ x => {
+        .foreach { x => {
           val hits = s"DB HITS COUNTER -- [${CreatureService.counter}]"
           println(hits)
           println(x)
           saveToFile(hits ++ "\n" ++ x.toString() ++ "\n", id)
-        }}
+        }
+        }
       )
   }
 
