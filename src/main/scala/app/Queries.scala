@@ -20,12 +20,6 @@ object Queries {
             name
             appearsIn
             homePlanet
-            friends {
-              id
-              name
-              appearsIn
-              homePlanet
-            }
           }
         }
       }
@@ -74,12 +68,6 @@ object Queries {
             name
             appearsIn
             homePlanet
-            friends {
-              id
-              name
-              appearsIn
-              homePlanet
-            }
           }
         }
       }

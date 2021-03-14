@@ -1,0 +1,30 @@
+type Human {
+    id: Int!
+    name: String
+    friends: [Human!]!
+    appearsIn: String!
+    homePlanet: String!
+}
+
+type HumanCached {
+    id: Int!
+    name: String
+    friends: [HumanCached!]!
+    appearsIn: String!
+    homePlanet: String!
+}
+
+type HumanDeferred {
+    id: Int!
+    name: String
+    friends: [HumanDeferred!]!
+    appearsIn: String!
+    homePlanet: String!
+}
+
+type Query {
+    human(ident: Int!): Human!
+    humanDeferred(ident: Int!): HumanDeferred!
+    humanCachedBatched(ident: Int!): HumanCached!
+    humanCached(ident: Int!): HumanCached!
+}

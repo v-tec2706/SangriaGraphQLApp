@@ -1,5 +1,6 @@
 package analysis
 
+import analysis.QueryAnalysis.Selections.simpleType
 import model.SchemaDefinition
 import sangria.ast.{Document, Field, Selection}
 import sangria.schema.{ListType, ObjectType, OptionType, OutputType, ScalarType, Schema}
@@ -11,7 +12,8 @@ object QueryAnalysis extends App {
   val schemaDefinition = SchemaDefinition.StarWarsSchema
   val queryTypes = getQueryTypes(schemaDefinition)
 
-  filterTypes(extractValues(analysis.Queries.baseQuery).head.head.asInstanceOf[Field], queryTypes, Selections.listSelected).map(x => println(x.renderPretty))
+  filterTypes2_(extractValues(analysis.Queries.baseQuery).head.head.asInstanceOf[Field], queryTypes).map(x => println(x.renderPretty))
+  //  filterTypes(extractValues(analysis.Queries.baseQuery).head.head.asInstanceOf[Field], queryTypes, Selections.listNotSelected).map(x => println(x.renderPretty))
 
   def getQueryTypes[Ctx, Val](schema: Schema[Ctx, Val]): Map[String, OutputType[_]] = schema.query.fields.map(x => (x.name, x.fieldType)).toMap
 
@@ -71,14 +73,37 @@ object QueryAnalysis extends App {
     case _ => Map.empty
   }
 
+  //    def filterTypes2[Ctx, Val](field: Field, types: Map[String, OutputType[_]], selection: OutputType[_] => Boolean): Option[Selection] = {
+  //      val rootType = types.get(field.name)
+  //      val innerTypes = rootType.map(extractSubfields).getOrElse(Map.empty)
+  //      rootType.map(_ => {
+  //        val selections: Seq[(Option[Selection], Option[Selection])] = field.selections.map { case field@Field(_, _, _, _, _, _, _, _) => filterTypes2_(field, innerTypes) }
+  //        field.copy(selections = selections.flatMap(_._1).toVector)
+  //      })
+  //    }
+
+  def filterTypes2_[Ctx, Val](field: Field, types: Map[String, OutputType[_]]): List[Selection] = {
+    val rootType = types.get(field.name)
+    val innerTypes = rootType.map(extractSubfields).getOrElse(Map.empty)
+    rootType.map(_ => {
+      val simpleSelections: Seq[Selection] = field.selections.flatMap { case field@Field(_, _, _, _, _, _, _, _) => filterTypes_(field, innerTypes, simpleType) }
+      val complexSelections = field.selections.map { case field@Field(_, _, _, _, _, _, _, _) => filterTypes2_(field, innerTypes) }
+      val simple = field.copy(name = "simple", selections = simpleSelections.toVector)
+      val complex = complexSelections.map(x => field.copy(name = "complex", selections = x.toVector))
+      simple :: complex.toList
+    }).getOrElse(List.empty)
+  }
+
   object Selections {
-    val listSelected: OutputType[_] => Boolean = {
-      case ListType(_) => true
+    val simpleType: OutputType[_] => Boolean = {
+      case ListType(_) => false
+      case ObjectType(_, _, _, _, _, _, _) => false
       case _ => false
     }
 
-    val listNotSelected: OutputType[_] => Boolean = {
-      case ListType(_) => false
+    val complexType: OutputType[_] => Boolean = {
+      case ListType(_) => true
+      case ObjectType(_, _, _, _, _, _, _) => true
       case _ => true
     }
   }
