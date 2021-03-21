@@ -86,5 +86,5 @@ object SchemaDefinition {
         arguments = Id :: Nil,
         resolve = ctx => cachedCreatures.defer(ctx.arg(Id))))
   )
-  val StarWarsSchema = Schema(Query)
+  val StarWarsSchema: Schema[CreatureService, Unit] = Schema(Query)
 }
