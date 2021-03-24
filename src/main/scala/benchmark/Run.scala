@@ -7,8 +7,8 @@ import benchmark.resolver.Resolver
 object Run extends App {
 
   val execution = new Execution(Resolver.build, QueriesSchema.benchmarkQuerySchema)
-  val res = execution.graphql(BenchmarkQueries.q1)
-  res.foreach(x => {
+  val res = execution.graphql(BenchmarkQueries.q8)
+  res.onComplete(x => {
     println(x)
     Execution.stop()
   })

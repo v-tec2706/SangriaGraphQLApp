@@ -25,12 +25,15 @@ class Execution[Ctx](resolver: Ctx, schema: Schema[Ctx, Unit], deferredResolver:
           deferredResolver = deferredResolver.getOrElse(DeferredResolver.empty),
           middleware = SlowLog.apolloTracing :: Nil
         )
-      case Failure(error: SyntaxError) => Future {
-        Json.obj(
-          "syntaxError" -> parse(error.getMessage).toOption.getOrElse(Json.Null),
-          "locations" -> Json.arr(Json.obj(
-            "line" -> parse(error.originalError.position.line.toString).toOption.getOrElse(Json.Null),
-            "column" -> parse(error.originalError.position.column.toString).toOption.getOrElse(Json.Null))))
+      case Failure(error: SyntaxError) => {
+        println(s"Syntax error: $error")
+        Future {
+          Json.obj(
+            "syntaxError" -> parse(error.getMessage).toOption.getOrElse(Json.Null),
+            "locations" -> Json.arr(Json.obj(
+              "line" -> parse(error.originalError.position.line.toString).toOption.getOrElse(Json.Null),
+              "column" -> parse(error.originalError.position.column.toString).toOption.getOrElse(Json.Null))))
+        }
       }
       case Failure(error) => throw error
     }

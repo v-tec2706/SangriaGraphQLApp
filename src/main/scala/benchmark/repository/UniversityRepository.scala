@@ -20,7 +20,7 @@ case class UniversityRepository() extends Repository[UniversityRecord, Universit
   def studyAt(personId: Long): DBIOAction[Seq[University], NoStream, Effect.Read] = (for {
     studyRel <- StudyAtRelationDb.table
     university <- table if studyRel.personId === personId && university.id === studyRel.universityId
-  } yield university).result.map(_.map(x => University(x._1, x._2, x._3, x._4)))
+  } yield university).result.map(_.map(entityMapping))
 
   override def table: H2Profile.api.TableQuery[UniversityDb] = UniversityDb.table
 }

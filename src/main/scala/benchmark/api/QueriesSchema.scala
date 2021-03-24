@@ -10,9 +10,15 @@ object QueriesSchema {
       Field("person", BenchmarkTypesSchema.Person, arguments = Id :: Nil,
         resolve = ctx => FutureValue(ctx.ctx.personResolver.getPerson(ctx.arg(Id)))
       ),
-      Field("personByParam", BenchmarkTypesSchema.Person, arguments = PersonName :: InstitutionLocation :: Limit :: Nil,
-        resolve = ctx => FutureValue(ctx.ctx.personResolver.getPerson(ctx.arg(Id)))
-      )
+      //      Field("personByAttr", BenchmarkTypesSchema.Person, arguments = PersonName :: Nil,
+      //        resolve = ctx => FutureValue(ctx.ctx.personResolver.getPerson(ctx.arg(PersonName)))
+      //      ),
+      //      Field("friendsMessages", BenchmarkTypesSchema.Person, arguments = Id :: Nil,
+      //        resolve = ctx => FutureValue(ctx.ctx.personResolver.getPerson(ctx.arg(Id)))
+      //      ),
+      //      Field("friendsOfFriendsMessages", BenchmarkTypesSchema.Person, arguments = Id :: Nil,
+      //        resolve = ctx => FutureValue(ctx.ctx.personResolver.getPerson(ctx.arg(Id)))
+      //      )
     )
   )
 

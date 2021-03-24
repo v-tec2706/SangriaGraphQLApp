@@ -19,8 +19,8 @@ object BenchmarkTypesSchema {
       Field("email", ListType(StringType), resolve = _.value.email),
       Field("speaks", ListType(StringType), resolve = _.value.speaks),
       Field("locationIP", StringType, resolve = _.value.locationIP),
-      Field("messages", ListType(), resolve = _.value)
-        Field("knows", ListType(Person), resolve = ctx => ctx.ctx.cityResolver.getCity(ctx.value.cityId)),
+      Field("messages", ListType(Message), resolve = ctx => ctx.ctx.messagesResolver.getBySender(ctx.value.id)),
+      Field("knows", ListType(Person), resolve = ctx => ctx.ctx.personResolver.knows(ctx.value.id)),
       Field("city", City, resolve = ctx => ctx.ctx.cityResolver.getCity(ctx.value.cityId)),
       Field("university", University, resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id)),
     )
@@ -62,6 +62,20 @@ object BenchmarkTypesSchema {
       Field("name", StringType, resolve = _.value.name),
       Field("url", StringType, resolve = _.value.url),
       Field("city", City, resolve = ctx => ctx.ctx.cityResolver.getCity(ctx.value.cityId))
+    )
+  )
+
+  lazy val Message: ObjectType[Resolver, Message] = ObjectType(
+    "Message",
+    () => fields[Resolver, Message](
+      Field("id", LongType, resolve = _.value.id),
+      Field("country", Country, resolve = ctx => ctx.ctx.countryResolver.getCountry(ctx.value.countryId)),
+      Field("person", Person, resolve = ctx => ctx.ctx.personResolver.getPerson(ctx.value.personId)),
+      Field("content", StringType, resolve = _.value.content),
+      Field("length", IntType, resolve = _.value.length),
+      Field("browserUsed", StringType, resolve = _.value.browserUsed),
+      Field("creationDate", GQLDate, resolve = _.value.creationDate),
+      Field("locationIP", StringType, resolve = _.value.locationIP),
     )
   )
 }
