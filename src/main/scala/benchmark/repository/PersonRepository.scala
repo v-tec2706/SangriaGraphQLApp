@@ -17,10 +17,7 @@ case class PersonRepository() extends Repository[PersonRecord, PersonDb, Person]
 
   def getPeople(ids: List[Long]): dbio.DBIO[Seq[Person]] = get { p: PersonDb => p.id inSet ids }.map(_.map(entity))
 
-  def knows(personId: Long): DBIOAction[Seq[Person], NoStream, Effect.Read] = (for {
-    knowsRelation <- KnowsRelationDb.table
-    people <- table if knowsRelation.personId === personId && people.id === knowsRelation.friendId
-  } yield people).result.map(_.map(entityMapping))
+  def knows(personId: Long): DBIOAction[Seq[Long], NoStream, Effect.Read] = KnowsRelationDb.table.filter(_.personId === personId).map(_.friendId).result
 
   override def table: H2Profile.api.TableQuery[PersonDb] = PersonDb.table
 

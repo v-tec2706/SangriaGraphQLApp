@@ -7,6 +7,7 @@ import slick.dbio
 import slick.dbio.Effect
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
+import slick.sql.FixedSqlStreamingAction
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -17,10 +18,7 @@ case class UniversityRepository() extends Repository[UniversityRecord, Universit
 
   def getUniversities(ids: List[Long]): dbio.DBIO[Seq[University]] = get { u: UniversityDb => u.id inSet ids }.map(_.map(entity))
 
-  def studyAt(personId: Long): DBIOAction[Seq[University], NoStream, Effect.Read] = (for {
-    studyRel <- StudyAtRelationDb.table
-    university <- table if studyRel.personId === personId && university.id === studyRel.universityId
-  } yield university).result.map(_.map(entityMapping))
+  def studyAt(personId: Long): FixedSqlStreamingAction[Seq[Long], Long, Effect.Read] = StudyAtRelationDb.table.filter(_.personId === personId).map(_.universityId).result
 
   override def table: H2Profile.api.TableQuery[UniversityDb] = UniversityDb.table
 }

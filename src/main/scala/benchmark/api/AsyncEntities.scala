@@ -1,14 +1,15 @@
 package benchmark.api
 
+import benchmark.Execution._
 import benchmark.api.CustomTypesSchema._
 import benchmark.entities._
-import benchmark.resolver.Resolver
+import benchmark.resolver.MainResolver
 import sangria.schema._
 
-object BenchmarkTypesSchema {
-  lazy val Person: ObjectType[Resolver, Person] = ObjectType(
+object AsyncEntities {
+  lazy val Person: ObjectType[MainResolver, Person] = ObjectType(
     "Person",
-    () => fields[Resolver, Person](
+    () => fields[MainResolver, Person](
       Field("id", LongType, resolve = _.value.id),
       Field("firstName", StringType, resolve = _.value.firstName),
       Field("lastName", StringType, resolve = _.value.lastName),
@@ -19,16 +20,26 @@ object BenchmarkTypesSchema {
       Field("email", ListType(StringType), resolve = _.value.email),
       Field("speaks", ListType(StringType), resolve = _.value.speaks),
       Field("locationIP", StringType, resolve = _.value.locationIP),
-      Field("messages", ListType(Message), resolve = ctx => ctx.ctx.messagesResolver.getBySender(ctx.value.id)),
-      Field("knows", ListType(Person), resolve = ctx => ctx.ctx.personResolver.knows(ctx.value.id)),
+      Field("messages", ListType(Message), resolve = ctx => for {
+        messagesId <- ctx.ctx.messagesResolver.getBySender(ctx.value.id)
+        messages <- ctx.ctx.messagesResolver.getMessageAsync(messagesId.toList)
+      } yield messages),
+      Field("knows", ListType(Person),
+        resolve = ctx => for {
+          friendIds <- ctx.ctx.personResolver.knows(ctx.value.id)
+          friends <- ctx.ctx.personResolver.getPeopleAsync(friendIds.toList)
+        } yield friends),
       Field("city", City, resolve = ctx => ctx.ctx.cityResolver.getCity(ctx.value.cityId)),
-      Field("university", University, resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id)),
+      Field("university", University, resolve = ctx => for {
+        universityId <- ctx.ctx.universityResolver.byStudent(ctx.value.id)
+        university <- ctx.ctx.universityResolver.getUniversity(universityId)
+      } yield university),
     )
   )
 
-  lazy val City: ObjectType[Resolver, City] = ObjectType(
+  lazy val City: ObjectType[MainResolver, City] = ObjectType(
     "City",
-    () => fields[Resolver, City](
+    () => fields[MainResolver, City](
       Field("id", LongType, resolve = _.value.id),
       Field("name", StringType, resolve = _.value.name),
       Field("url", StringType, resolve = _.value.url),
@@ -36,28 +47,19 @@ object BenchmarkTypesSchema {
     )
   )
 
-  lazy val Country: ObjectType[Resolver, Country] = ObjectType(
+  lazy val Country: ObjectType[MainResolver, Country] = ObjectType(
     "Country",
-    () => fields[Resolver, Country](
+    () => fields[MainResolver, Country](
       Field("id", LongType, resolve = _.value.id),
       Field("name", StringType, resolve = _.value.name),
       Field("url", StringType, resolve = _.value.url),
-      Field("continent", Continent, resolve = ctx => ctx.ctx.continentResolver.getContinent(ctx.value.continentId))
+      Field("continent", CommonEntities.Continent, resolve = ctx => ctx.ctx.continentResolver.getContinent(ctx.value.continentId))
     )
   )
 
-  lazy val Continent: ObjectType[Resolver, Continent] = ObjectType(
-    "Continent",
-    () => fields[Resolver, Continent](
-      Field("id", LongType, resolve = _.value.id),
-      Field("name", StringType, resolve = _.value.name),
-      Field("url", StringType, resolve = _.value.url),
-    )
-  )
-
-  lazy val University: ObjectType[Resolver, University] = ObjectType(
+  lazy val University: ObjectType[MainResolver, University] = ObjectType(
     "University",
-    () => fields[Resolver, University](
+    () => fields[MainResolver, University](
       Field("id", LongType, resolve = _.value.id),
       Field("name", StringType, resolve = _.value.name),
       Field("url", StringType, resolve = _.value.url),
@@ -65,9 +67,9 @@ object BenchmarkTypesSchema {
     )
   )
 
-  lazy val Message: ObjectType[Resolver, Message] = ObjectType(
+  lazy val Message: ObjectType[MainResolver, Message] = ObjectType(
     "Message",
-    () => fields[Resolver, Message](
+    () => fields[MainResolver, Message](
       Field("id", LongType, resolve = _.value.id),
       Field("country", Country, resolve = ctx => ctx.ctx.countryResolver.getCountry(ctx.value.countryId)),
       Field("person", Person, resolve = ctx => ctx.ctx.personResolver.getPerson(ctx.value.personId)),

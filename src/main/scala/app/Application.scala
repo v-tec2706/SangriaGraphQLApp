@@ -14,8 +14,7 @@ import service.CreatureDeferredResolver.{batchedCreatures, cachedBatchedCreature
 import service.CreatureService
 
 import java.util.concurrent.Executors
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class Application {
@@ -31,6 +30,7 @@ class Application {
 
   private def executeQuery(query: String, variables: Option[Json], operation: Option[String], tracing: Boolean): Future[Json] = {
     implicit val z = MyExecutionContext.ex
+    val k: DeferredResolver[CreatureService] = DeferredResolver.fetchers(batchedCreatures, cachedBatchedCreatures, cachedCreatures)
     val characterRepository = CharacterRepository(Repository.database)
     QueryParser.parse(query) match {
       // query parsed successfully, time to execute it!
