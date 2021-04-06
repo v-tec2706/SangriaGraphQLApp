@@ -2,8 +2,10 @@ package benchmark.data.model
 
 import slick.jdbc.H2Profile.api._
 
-class WorkAtRelationDb(tag: Tag) extends Table[(Long, Long)](tag, "WorkAtRelation") {
-  override def * = (personId, companyId)
+import java.time.LocalDate
+
+class WorkAtRelationDb(tag: Tag) extends Table[(Long, Long, LocalDate)](tag, "WorkAtRelation") {
+  override def * = (personId, companyId, startDate)
 
   def companyId = column[Long]("companyId")
 
@@ -12,6 +14,8 @@ class WorkAtRelationDb(tag: Tag) extends Table[(Long, Long)](tag, "WorkAtRelatio
   def personId = column[Long]("personId")
 
   def companyFk = foreignKey("companyFk", companyId, CompanyDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+
+  def startDate = column[LocalDate]("startDate")
 }
 
 object WorkAtRelationDb {

@@ -54,7 +54,7 @@ object DataGenerator extends App {
   lazy val continentInsert = Insert.relationInsert[ContinentRecord, ContinentDb]((1 to idRanges(Entries.Continent)) map (i => (i, s"continent-${i}", s"url-${i}")), ContinentDb.table)
   lazy val countryInsert = Insert.relationInsert[CountryRecord, CountryDb]((1 to idRanges(Entries.Country)) map (i => (i, Random.between(1, idRanges(Entries.Continent)), s"country-${i}", s"url-${i}")), CountryDb.table)
   lazy val cityInsert = Insert.relationInsert[CityRecord, CityDb]((1 to idRanges(Entries.City)) map (i => (i, Random.between(1, idRanges(Entries.Country)), s"city-${i}", s"url-${i}")), CityDb.table)
-  lazy val companyInsert = Insert.relationInsert[CompanyRecord, CompanyDb]((1 to idRanges(Entries.Company)) map (i => (i, Random.between(1, idRanges(Entries.City)), s"company-${i}", s"url-${i}")), CompanyDb.table)
+  lazy val companyInsert = Insert.relationInsert[CompanyRecord, CompanyDb]((1 to idRanges(Entries.Company)) map (i => (i, Random.between(1, idRanges(Entries.Country)), s"company-${i}", s"url-${i}")), CompanyDb.table)
   lazy val personInsert = Insert.relationInsert[PersonRecord, PersonDb]((1 to idRanges(Entries.Person)) map (i => (i, Random.between(1, idRanges(Entries.City)), s"first-name-${i}", s"last-name-${i}", s"genders-$i", LocalDate.now().minusYears((i / 50) + 20), s"browser-used-$i", LocalDate.now().minusMonths(i), List(s"email-$i"), List(s"speaks-$i"), s"locationIp-$i")), PersonDb.table)
   lazy val forumInsert = Insert.relationInsert[ForumRecord, ForumDb]((1 to idRanges(Entries.Forum)) map (i => (i, Random.between(1, idRanges(Entries.Person)), s"title-${i}", LocalDate.now().minusMonths(Random.nextInt(i)))), ForumDb.table)
   lazy val messageInsert = Insert.relationInsert[MessageRecord, MessageDb]((1 to idRanges(Entries.Message)) map (i => (i, Random.between(1, idRanges(Entries.Person)), Random.nextInt(idRanges(Entries.Person)), s"browser-used-$i", LocalDate.now().minusMonths(Random.nextInt(i)), s"location-ip-${i}", s"content-$i", Random.nextInt(i * 1000))), MessageDb.table)
@@ -69,7 +69,7 @@ object DataGenerator extends App {
   lazy val likesRelation = Insert.relationInsert[RelationRecord, LikesRelationDb](generateRelation(idRanges(Entries.Person), idRanges(Entries.Message)), LikesRelationDb.table)
   lazy val messageTagRelation = Insert.relationInsert[RelationRecord, MessageTagRelationDb](generateRelation(idRanges(Entries.Message), idRanges(Entries.TagClass)), MessageTagRelationDb.table)
   lazy val studyAtRelation = Insert.relationInsert[RelationRecord, StudyAtRelationDb](generateRelation(idRanges(Entries.Person), idRanges(Entries.University)), StudyAtRelationDb.table)
-  lazy val workAtRelation = Insert.relationInsert[RelationRecord, WorkAtRelationDb](generateRelation(idRanges(Entries.Person), idRanges(Entries.Company)), WorkAtRelationDb.table)
+  lazy val workAtRelation = Insert.relationInsert[(Long, Long, LocalDate), WorkAtRelationDb](generateRelation(idRanges(Entries.Person), idRanges(Entries.Company)).map(x => (x._1, x._2, LocalDate.now().minusMonths(Random.nextInt(100)))), WorkAtRelationDb.table)
 
   val db = Repository.database
   val insertQueries = DBIO.seq(

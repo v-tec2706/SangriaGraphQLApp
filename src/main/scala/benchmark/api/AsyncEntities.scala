@@ -6,6 +6,8 @@ import benchmark.entities._
 import benchmark.resolver.MainResolver
 import sangria.schema._
 
+import java.time.LocalDate
+
 object AsyncEntities {
   lazy val Person: ObjectType[MainResolver, Person] = ObjectType(
     "Person",
@@ -29,6 +31,45 @@ object AsyncEntities {
           friendIds <- ctx.ctx.personResolver.knows(ctx.value.id)
           friends <- ctx.ctx.personResolver.getPeopleAsync(friendIds.toList)
         } yield friends),
+      Field("city", City, resolve = ctx => ctx.ctx.cityResolver.getCity(ctx.value.cityId)),
+      Field("university", University, resolve = ctx => for {
+        universityId <- ctx.ctx.universityResolver.byStudent(ctx.value.id)
+        university <- ctx.ctx.universityResolver.getUniversity(universityId)
+      } yield university),
+    )
+  )
+
+  lazy val PersonWithArgs: ObjectType[MainResolver, Person] = ObjectType(
+    "Person",
+    () => fields[MainResolver, Person](
+      Field("id", LongType, resolve = _.value.id),
+      Field("firstName", StringType, resolve = _.value.firstName),
+      Field("lastName", StringType, resolve = _.value.lastName),
+      Field("gender", StringType, resolve = _.value.gender),
+      Field("birthday", GQLDate, resolve = _.value.birthday),
+      Field("browserUsed", StringType, resolve = _.value.browserUsed),
+      Field("creationDate", GQLDate, resolve = _.value.creationDate),
+      Field("email", ListType(StringType), resolve = _.value.email),
+      Field("speaks", ListType(StringType), resolve = _.value.speaks),
+      Field("locationIP", StringType, resolve = _.value.locationIP),
+      Field("messages", ListType(Message), resolve = ctx => for {
+        messagesId <- ctx.ctx.messagesResolver.getBySender(ctx.value.id)
+        messages <- ctx.ctx.messagesResolver.getMessageAsync(messagesId.toList)
+      } yield messages),
+      Field("knows", ListType(Person),
+        arguments = Arguments.Year :: Arguments.Country :: Nil,
+        resolve = ctx => {
+          println(s"ARGS: ${ctx.args}")
+          for {
+            friendIds <- ctx.ctx.personResolver.knows(ctx.value.id)
+            workAt <- ctx.ctx.companyResolver.workAt(friendIds.toList)
+              .map(_.filter(_._3.compareTo(LocalDate.parse(ctx.arg(Arguments.Year).toString + "-01-01")) >= 0))
+            country <- ctx.ctx.countryResolver.getCountryByName(ctx.arg(Arguments.Country)).map(_.id)
+            companyLocatedIn <- ctx.ctx.companyResolver.getCompanies(workAt.map(_._2)).map(_.filter(_.countryId == country)).map(_.map(_.id))
+            toFind = workAt.filter(x => companyLocatedIn.contains(x._2)).map(_._1)
+            friends <- ctx.ctx.personResolver.getPeopleAsync(toFind.toList)
+          } yield friends
+        }),
       Field("city", City, resolve = ctx => ctx.ctx.cityResolver.getCity(ctx.value.cityId)),
       Field("university", University, resolve = ctx => for {
         universityId <- ctx.ctx.universityResolver.byStudent(ctx.value.id)

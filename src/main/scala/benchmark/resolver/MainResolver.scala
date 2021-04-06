@@ -10,7 +10,8 @@ case class MainResolver(
                          countryResolver: CountryResolver,
                          continentResolver: ContinentResolver,
                          universityResolver: UniversityResolver,
-                         messagesResolver: MessageResolver
+                         messagesResolver: MessageResolver,
+                         companyResolver: CompanyResolver
                        )
 
 object MainResolver {
@@ -20,6 +21,7 @@ object MainResolver {
     CountryResolver(CountryRepository()),
     ContinentResolver(ContinentRepository()),
     UniversityResolver(UniversityRepository()),
-    MessageResolver(MessageRepository())
+    MessageResolver(MessageRepository()),
+    CompanyResolver(CompanyRepository())
   )
 }

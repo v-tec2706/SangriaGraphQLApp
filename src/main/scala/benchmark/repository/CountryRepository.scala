@@ -16,5 +16,7 @@ case class CountryRepository() extends Repository[CountryRecord, CountryDb, Coun
 
   def getCountry(id: Long): dbio.DBIO[Seq[Country]] = get { c: CountryDb => c.id === id }.map(_.map(entity))
 
+  def getCountry(name: String): dbio.DBIO[Seq[Country]] = get { c: CountryDb => c.name === name }.map(_.map(entity))
+
   def getCountries(ids: List[Long]): dbio.DBIO[Seq[Country]] = get { c: CountryDb => c.id inSet ids }.map(_.map(entity))
 }

@@ -8,7 +8,7 @@ import benchmark.resolver.PersonResolver.batchedPersonResolver
 import benchmark.resolver._
 import sangria.schema._
 
-object DeferredEntities {
+object BatchedEntities {
   lazy val Person: ObjectType[MainResolver, Person] = ObjectType(
     "Person",
     () => fields[MainResolver, Person](

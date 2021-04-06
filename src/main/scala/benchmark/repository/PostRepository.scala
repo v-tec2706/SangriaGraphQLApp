@@ -14,7 +14,7 @@ case class PostRepository() extends Repository[PostRecord, PostDb, Post] {
 
   override def entityMapping: PostRecord => Post = p => Post(p._1, p._2, p._3)
 
-  def getCity(id: Long): dbio.DBIO[Seq[Post]] = get { c: PostDb => c.forumId === id }.map(_.map(entity))
+  def getPost(id: Long): dbio.DBIO[Seq[Post]] = get { c: PostDb => c.forumId === id }.map(_.map(entity))
 
-  def getCities(ids: List[Long]): dbio.DBIO[Seq[Post]] = get { c: PostDb => c.forumId inSet ids }.map(_.map(entity))
+  def getPosts(ids: List[Long]): dbio.DBIO[Seq[Post]] = get { c: PostDb => c.forumId inSet ids }.map(_.map(entity))
 }

@@ -25,7 +25,39 @@ object BenchmarkQueries {
       |         name
       |       }
       |     }
-      |  }
+      |     knows {
+      |         firstName
+      |         lastName
+      |         city {
+      |           name
+      |           country {
+      |             name
+      |           }
+      |         }
+      |         university {
+      |            name
+      |            city {
+      |              name
+      |            }
+      |          }
+      |         knows {
+      |             firstName
+      |             lastName
+      |             city {
+      |               name
+      |               country {
+      |                 name
+      |               }
+      |             }
+      |             university {
+      |                name
+      |                city {
+      |                  name
+      |               }
+      |            }
+      |         }
+      |      }
+      |   }
       |}
       |""".stripMargin
 
@@ -36,9 +68,32 @@ object BenchmarkQueries {
   val q2: String =
     """
       |query q1 {
-      |  personByName(firstName: name-5, liveIn: city-2, studyAt: university-3) {
+      |  personWithArgs(id: 100) {
       |    firstName
       |    lastName
+      |    knows(year: 2000, country: "country-5") {
+      |     id
+      |    }
+      |   }
+      |}
+      |""".stripMargin
+
+  val q21: String =
+    """
+      |query q1 {
+      |  personWithArgs(date: 2018) {
+      |    firstName
+      |    lastName
+      |    worksAt {
+      |     companyId
+      |     ...
+      |     city {
+      |      ...
+      |      country {
+      |
+      |      }
+      |     }
+      |    }
       |    city {
       |      name
       |      country {

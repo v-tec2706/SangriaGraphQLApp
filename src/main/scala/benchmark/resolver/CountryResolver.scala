@@ -11,6 +11,8 @@ import scala.concurrent.Future
 case class CountryResolver(countryRepository: CountryRepository) extends Resolver {
   def getCountry(id: Long): Future[Country] = Repository.database.run(countryRepository.getCountry(id).map(_.head))
 
+  def getCountryByName(name: String): Future[Country] = Repository.database.run(countryRepository.getCountry(name).map(_.head))
+
   def getCountries(ids: Seq[Long]): Future[Seq[Country]] = Repository.database.run(countryRepository.getCountries(ids.toList))
 }
 

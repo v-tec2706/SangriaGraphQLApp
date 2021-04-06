@@ -4,7 +4,6 @@ import sangria.schema.{Argument, IntType, LongType, StringType}
 
 object Arguments {
   val Id: Argument[Long] = Argument("id", LongType)
-  val PersonName: Argument[String] = Argument("personName", StringType)
-  val InstitutionLocation: Argument[String] = Argument("institutionLocation", StringType)
-  val Limit: Argument[Int] = Argument("limit", IntType)
+  val Country: Argument[String] = Argument("country", StringType)
+  val Year: Argument[Int] = Argument("year", IntType)
 }
