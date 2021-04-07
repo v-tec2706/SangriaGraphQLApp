@@ -14,7 +14,11 @@ object QueriesSchema {
         resolve = ctx => FutureValue(ctx.ctx.personResolver.getPerson(ctx.arg(Id)))
       ),
       Field("personBatched", BatchedEntities.Person, arguments = Id :: Nil,
-        resolve = ctx => PersonResolver.batchedPersonResolver.defer(ctx.arg(Id)))
+        resolve = ctx => PersonResolver.batchedPersonResolver.defer(ctx.arg(Id))
+      ),
+      Field("personWithArgsBatched", BatchedEntities.PersonWithArgs, arguments = Id :: Nil,
+        resolve = ctx => PersonResolver.batchedPersonResolver.defer(ctx.arg(Id))
+      )
     )
   )
 

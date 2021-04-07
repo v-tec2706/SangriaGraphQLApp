@@ -1,6 +1,6 @@
 package benchmark
 
-object BenchmarkQueries {
+object BenchmarkQueriesB {
 
   /*
         Query: Q1 - simple navigational query, fetch nested relation with depth = 3, requires concatenation of nested
@@ -77,39 +77,6 @@ object BenchmarkQueries {
       |   }
       |}
       |""".stripMargin
-
-  val q21: String =
-    """
-      |query q1 {
-      |  personWithArgs(date: 2018) {
-      |    firstName
-      |    lastName
-      |    worksAt {
-      |     companyId
-      |     ...
-      |     city {
-      |      ...
-      |      country {
-      |
-      |      }
-      |     }
-      |    }
-      |    city {
-      |      name
-      |      country {
-      |        name
-      |      }
-      |    }
-      |    university {
-      |       name
-      |       city {
-      |         name
-      |       }
-      |     }
-      |  }
-      |}
-      |""".stripMargin
-
   /*
     Query: Q3 - query with multi element collections as subfields, elements in collections are rather unique, and only
     small subset of fields is selected

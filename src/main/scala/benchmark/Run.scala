@@ -16,7 +16,7 @@ object Run extends App {
   )
 
   val execution = new Execution(MainResolver.build, QueriesSchema.benchmarkQuerySchema, Some(resolvers))
-  val res = execution.graphql(BenchmarkQueries.q2)
+  val res = execution.graphql(BenchmarkQueriesA.q2)
   res.onComplete(x => {
     println(x)
     Execution.stop()
