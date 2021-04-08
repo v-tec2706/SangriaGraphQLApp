@@ -10,21 +10,22 @@ object Queries {
         human(ident: 1001) {
           id
           name
-          appearsIn
           homePlanet
           friends {
             id
             name
             appearsIn
-            homePlanet
             friends {
-              id
-              name
-              appearsIn
-              homePlanet
-            }
+                id
+                homePlanet
+                friends {
+                  id
+                  name
+                  homePlanet
+                }
+              }
           }
-        }
+       }
     }
     """
 
