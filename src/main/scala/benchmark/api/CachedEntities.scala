@@ -3,14 +3,18 @@ package benchmark.api
 import benchmark.Execution._
 import benchmark.api.CustomTypesSchema._
 import benchmark.entities._
-import benchmark.resolver.MessageResolver.batchedMessageResolver
-import benchmark.resolver.PersonResolver.batchedPersonResolver
+import benchmark.resolver.CityResolver.cachedCityResolver
+import benchmark.resolver.ContinentResolver.cachedContinentResolver
+import benchmark.resolver.CountryResolver.cachedCountryResolver
+import benchmark.resolver.MessageResolver.cachedMessageResolver
+import benchmark.resolver.PersonResolver.cachedPersonResolver
+import benchmark.resolver.UniversityResolver.cachedUniversityResolver
 import benchmark.resolver._
 import sangria.schema._
 
 import java.time.LocalDate
 
-object BatchedEntities {
+object CachedEntities {
   lazy val Person: ObjectType[MainResolver, Person] = ObjectType(
     "Person",
     () => fields[MainResolver, Person](
@@ -25,19 +29,16 @@ object BatchedEntities {
       Field("speaks", ListType(StringType), resolve = _.value.speaks),
       Field("locationIP", StringType, resolve = _.value.locationIP),
       Field("messages", ListType(Message),
-        resolve = ctx => ctx.ctx.messagesResolver
-          .getBySender(ctx.value.id)
-          .map(_.toSet)
-          .map(x => batchedMessageResolver.deferSeq(x.toList))
-      ),
+        resolve = ctx => {
+          val z = ctx.ctx.messagesResolver.getBySender(ctx.value.id).map(_.toSet)
+          z.map(x => cachedMessageResolver.deferSeq(x.toList))
+        }),
       Field("knows", ListType(Person),
-        resolve = ctx => ctx.ctx.personResolver.knows(ctx.value.id).map(batchedPersonResolver.deferSeq)),
-      Field("city", City, resolve = ctx => CityResolver.batchedCityResolver.defer(ctx.value.cityId)),
-      Field("university", ListType(University), resolve = ctx => {
-        UniversityResolver.batchedUniversityResolver.deferRelSeq(UniversityResolver.universityByStudent, ctx.value.id)
-      }),
-    ))
-
+        resolve = ctx => ctx.ctx.personResolver.knows(ctx.value.id).map(cachedPersonResolver.deferSeq)),
+      Field("city", City, resolve = ctx => cachedCityResolver.defer(ctx.value.cityId)),
+      Field("university", University, resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id).map(cachedUniversityResolver.defer)),
+    )
+  )
 
   lazy val PersonWithArgs: ObjectType[MainResolver, Person] = ObjectType(
     "Person",
@@ -53,7 +54,7 @@ object BatchedEntities {
       Field("speaks", ListType(StringType), resolve = _.value.speaks),
       Field("locationIP", StringType, resolve = _.value.locationIP),
       Field("messages", ListType(Message),
-        resolve = ctx => ctx.ctx.messagesResolver.getBySender(ctx.value.id).map(batchedMessageResolver.deferSeq)),
+        resolve = ctx => ctx.ctx.messagesResolver.getBySender(ctx.value.id).map(cachedMessageResolver.deferSeq)),
       Field("knows", ListType(Person),
         arguments = Arguments.Year :: Arguments.Country :: Nil,
         resolve = ctx => {
@@ -64,10 +65,10 @@ object BatchedEntities {
             country <- ctx.ctx.countryResolver.getCountryByName(ctx.arg(Arguments.Country)).map(_.id)
             companyLocatedIn <- ctx.ctx.companyResolver.getCompanies(workAt.map(_._2)).map(_.filter(_.countryId == country)).map(_.map(_.id))
             toFind = workAt.filter(x => companyLocatedIn.contains(x._2)).map(_._1)
-          } yield batchedPersonResolver.deferSeq(toFind.toList)
+          } yield cachedPersonResolver.deferSeq(toFind.toList)
         }),
-      Field("city", City, resolve = ctx => CityResolver.batchedCityResolver.defer(ctx.value.cityId)),
-      Field("university", University, resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id).map(UniversityResolver.batchedUniversityResolver.defer)),
+      Field("city", City, resolve = ctx => cachedCityResolver.defer(ctx.value.cityId)),
+      Field("university", University, resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id).map(cachedUniversityResolver.defer)),
     )
   )
 
@@ -77,7 +78,7 @@ object BatchedEntities {
       Field("id", LongType, resolve = _.value.id),
       Field("name", StringType, resolve = _.value.name),
       Field("url", StringType, resolve = _.value.url),
-      Field("country", Country, resolve = ctx => CountryResolver.batchedCountryResolver.defer(ctx.value.countryId))
+      Field("country", Country, resolve = ctx => cachedCountryResolver.defer(ctx.value.countryId))
     )
   )
 
@@ -87,7 +88,7 @@ object BatchedEntities {
       Field("id", LongType, resolve = _.value.id),
       Field("name", StringType, resolve = _.value.name),
       Field("url", StringType, resolve = _.value.url),
-      Field("continent", CommonEntities.Continent, resolve = ctx => ContinentResolver.batchedContinentResolver.defer(ctx.value.continentId))
+      Field("continent", CommonEntities.Continent, resolve = ctx => cachedContinentResolver.defer(ctx.value.continentId))
     )
   )
 
@@ -97,7 +98,7 @@ object BatchedEntities {
       Field("id", LongType, resolve = _.value.id),
       Field("name", StringType, resolve = _.value.name),
       Field("url", StringType, resolve = _.value.url),
-      Field("city", City, resolve = ctx => CityResolver.batchedCityResolver.defer(ctx.value.cityId))
+      Field("city", City, resolve = ctx => cachedCityResolver.defer(ctx.value.cityId))
     )
   )
 
@@ -105,8 +106,8 @@ object BatchedEntities {
     "Message",
     () => fields[MainResolver, Message](
       Field("id", LongType, resolve = _.value.id),
-      Field("country", Country, resolve = ctx => CountryResolver.batchedCountryResolver.defer(ctx.value.countryId)),
-      Field("person", Person, resolve = ctx => PersonResolver.batchedPersonResolver.defer(ctx.value.personId)),
+      Field("country", Country, resolve = ctx => cachedCountryResolver.defer(ctx.value.countryId)),
+      Field("person", Person, resolve = ctx => cachedPersonResolver.defer(ctx.value.personId)),
       Field("content", StringType, resolve = _.value.content),
       Field("length", IntType, resolve = _.value.length),
       Field("browserUsed", StringType, resolve = _.value.browserUsed),

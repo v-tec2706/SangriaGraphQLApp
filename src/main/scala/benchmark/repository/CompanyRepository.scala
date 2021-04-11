@@ -21,7 +21,9 @@ case class CompanyRepository() extends Repository[CompanyRecord, CompanyDb, Comp
 
   def getCompanies(ids: List[Long]): dbio.DBIO[Seq[Company]] = get { c: CompanyDb => c.id inSet ids }.map(_.map(entity))
 
-  def worksAt(personId: Long): FixedSqlStreamingAction[Seq[Long], Long, Effect.Read] = WorkAtRelationDb.table.filter(_.personId === personId).map(_.companyId).result
+  def worksAt(personId: Long): FixedSqlStreamingAction[Seq[(Long, Long, LocalDate)], (Long, Long, LocalDate), Effect.Read] =
+    WorkAtRelationDb.table.filter(_.personId === personId).map(x => (x.personId, x.companyId, x.startDate)).result
 
-  def workAt(personIds: List[Long]): FixedSqlStreamingAction[Seq[(Long, Long, LocalDate)], (Long, Long, LocalDate), Effect.Read] = WorkAtRelationDb.table.filter(_.personId inSet personIds).map(x => (x.personId, x.companyId, x.startDate)).result
+  def workAt(personIds: List[Long]): FixedSqlStreamingAction[Seq[(Long, Long, LocalDate)], (Long, Long, LocalDate), Effect.Read] =
+    WorkAtRelationDb.table.filter(_.personId inSet personIds).map(x => (x.personId, x.companyId, x.startDate)).result
 }

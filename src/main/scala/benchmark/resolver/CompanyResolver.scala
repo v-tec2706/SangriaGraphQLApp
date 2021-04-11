@@ -14,7 +14,7 @@ case class CompanyResolver(companyRepository: CompanyRepository) extends Resolve
 
   def getCompanies(ids: Seq[Long]): Future[Seq[Company]] = Repository.database.run(companyRepository.getCompanies(ids.toList))
 
-  def worksAt(personId: Long): Future[Seq[Long]] = Repository.database.run(companyRepository.worksAt(personId))
+  def worksAt(personId: Long): Future[(Long, Long, LocalDate)] = Repository.database.run(companyRepository.worksAt(personId).head)
 
   def workAt(personIds: List[Long]): Future[Seq[(Long, Long, LocalDate)]] = Repository.database.run(companyRepository.workAt(personIds))
 }

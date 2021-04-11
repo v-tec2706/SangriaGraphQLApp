@@ -7,6 +7,7 @@ import benchmark.resolver.MainResolver
 import sangria.schema._
 
 import java.time.LocalDate
+import scala.concurrent.Future
 
 object AsyncEntities {
   lazy val Person: ObjectType[MainResolver, Person] = ObjectType(
@@ -59,13 +60,12 @@ object AsyncEntities {
       Field("knows", ListType(Person),
         arguments = Arguments.Year :: Arguments.Country :: Nil,
         resolve = ctx => {
-          println(s"ARGS: ${ctx.args}")
           for {
             friendIds <- ctx.ctx.personResolver.knows(ctx.value.id)
-            workAt <- ctx.ctx.companyResolver.workAt(friendIds.toList)
-              .map(_.filter(_._3.compareTo(LocalDate.parse(ctx.arg(Arguments.Year).toString + "-01-01")) >= 0))
+            workAt <- Future.sequence(friendIds.map(ctx.ctx.companyResolver.worksAt))
+              .map(_.filter { case (_, _, year) => year.compareTo(LocalDate.parse(ctx.arg(Arguments.Year).toString + "-01-01")) >= 0 })
             country <- ctx.ctx.countryResolver.getCountryByName(ctx.arg(Arguments.Country)).map(_.id)
-            companyLocatedIn <- ctx.ctx.companyResolver.getCompanies(workAt.map(_._2)).map(_.filter(_.countryId == country)).map(_.map(_.id))
+            companyLocatedIn <- Future.sequence(workAt.map(x => ctx.ctx.companyResolver.getCompany(x._2))).map(_.filter(_.countryId == country)).map(_.map(_.id))
             toFind = workAt.filter(x => companyLocatedIn.contains(x._2)).map(_._1)
             friends <- ctx.ctx.personResolver.getPeopleAsync(toFind.toList)
           } yield friends

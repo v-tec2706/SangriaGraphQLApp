@@ -19,3 +19,5 @@ libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "9.4-1206-jdbc42",
   "com.github.tminglei" %% "slick-pg" % "0.19.5"
 )
+
+mainClass in(Compile, run) := Some("benchmark.Run")

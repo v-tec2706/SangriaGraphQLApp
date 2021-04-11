@@ -1,9 +1,12 @@
 package analysis
 
 import analysis.QueryAnalysis.TypeExtractor.{complexType, simpleType}
+import benchmark.BenchmarkQueries
+import benchmark.BenchmarkQueries.Strategies
 import benchmark.api.QueriesSchema.benchmarkQuerySchema
 import model.SchemaDefinition
 import sangria.ast.{Document, Field, Selection}
+import sangria.parser.QueryParser
 import sangria.schema.{ListType, ObjectType, OptionType, OutputType, ScalarType, Schema}
 
 import scala.annotation.tailrec
@@ -13,7 +16,12 @@ object QueryAnalysis extends App {
   val schemaDefinition = SchemaDefinition.StarWarsSchema
   val queryTypes = getQueryTypes(benchmarkQuerySchema)
 
-  splitQuery(extractValues(benchmark.BenchmarkQueriesA.q1).head.head.asInstanceOf[Field], queryTypes).map(x => println(x.renderPretty))
+  QueryParser.parse(BenchmarkQueries.q1(Strategies.Async))
+    .map(extractValues)
+    .map(_.head.head.asInstanceOf[Field])
+    .map(splitQuery(_, queryTypes))
+    .map(_.map(_.renderPretty))
+    .map(_.map(println))
 
   def getQueryTypes[Ctx, Val](schema: Schema[Ctx, Val]): Map[String, OutputType[_]] = schema.query.fields.map(x => (x.name, x.fieldType)).toMap
 
