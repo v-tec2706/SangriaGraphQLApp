@@ -20,4 +20,4 @@ libraryDependencies ++= Seq(
   "com.github.tminglei" %% "slick-pg" % "0.19.5"
 )
 
-mainClass in(Compile, run) := Some("benchmark.Run")
+mainClass in assembly := Some("benchmark.Run")

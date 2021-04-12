@@ -1,0 +1,11 @@
+version: '3'
+services:
+  growthengine:
+    image: benchmark:latest
+
+  postgres:
+    image: postgres
+    env_file:
+      - database.env
+    ports:
+      - "5432:5432"

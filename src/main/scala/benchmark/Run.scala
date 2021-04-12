@@ -34,7 +34,9 @@ object Run extends App {
     case _ => println("Unknown strategy, using default"); Strategies.Async
   }
 
-  Future.sequence(all(strategy.getOrElse(Strategies.Async))
+  val strategyToUse = strategy.getOrElse(Strategies.Async)
+  println(s"Using strategy: $strategyToUse")
+  Future.sequence(all(strategyToUse)
     .map { case (name, q) => (name, execution.graphql(q)) }
     .map { case (name, res) => res.map(res => processResult(name, res)) }
   ).onComplete(_ => stop())
