@@ -1,7 +1,9 @@
 package analysis
 
+import analysis.PerformAnalysis.QueryTypes
+import analysis.PerformAnalysis.QueryTypes.QueryType
 import sangria.ast.{Document, Field, Selection}
-import sangria.schema.{ListType, ObjectType, OptionType, OutputType, ScalarType, Schema}
+import sangria.schema.{ListType, ObjectType, OptionType, OutputType, ScalarType, Schema, Type}
 
 import scala.annotation.tailrec
 import scala.collection.immutable
@@ -10,14 +12,15 @@ class QueryAnalyzer {
 
   type TypesMap = Map[String, OutputType[_]]
 
-  val filterSelections: (Field, TypesMap) => immutable.Iterable[Field] = (field: Field, subfields: TypesMap) => field
+  val filterSelections: (Field, Map[String, List[AnalyzedField]]) => immutable.Iterable[(Field, QueryType)] = (field, subfields) => field
     .selections
     .groupBy { case FieldNameExtractor(name) => name }
     .map { case (_, selections) => mergeFields(selections) }
-    .filter { case FieldNameExtractor(name) => subfields.keys.toList contains name }
+    .filter { case FieldNameExtractor(name) => subfields.contains(name) }
+    .map(field => (field, subfields.get(field.name).map(_.map(_.label).head).getOrElse(QueryTypes.Unknown)))
 
-  private val extractField: (TypesMap, OutputType[_] => Boolean) => TypesMap = (types, cond) =>
-    types.filter { case (_, outputType) => cond(outputType) }
+  private val extractField: (List[AnalyzedField], OutputType[_] => Boolean) => List[AnalyzedField] = (fields, cond) =>
+    fields.filter(a => cond(a.ofType))
 
   def getQueryTypes[Ctx, Val](schema: Schema[Ctx, Val]): Map[String, OutputType[_]] = schema.query.fields.map(x => (x.name, x.fieldType)).toMap
 
@@ -34,24 +37,22 @@ class QueryAnalyzer {
     case _ => Map.empty
   }
 
-  def splitQuery[Ctx, Val](field: Field, types: Map[String, OutputType[_]]): List[Selection] = {
-    val rootType = types.get(field.name)
-    val innerTypes = rootType.map(extractSubfields(_, field.selections.map { case FieldNameExtractor(name) => name }.toList)).getOrElse(Map.empty)
+  def splitQuery[Ctx, Val](field: Field, types: Map[String, OutputType[_]]): List[(Selection, Set[QueryType])] = {
+    val rootSelection = types.get(field.name)
+    val innerSelection = rootSelection.map(extractSubfields(_, field.selections.map { case FieldNameExtractor(name) => name }.toList)).getOrElse(Map.empty)
+    val innerSelectionTypes: List[AnalyzedField] = innerSelection.map { case (name, field) => AnalyzedField(name, field, resolveType(field)) }.toList
+    val simpleSubfields = extractField(innerSelectionTypes, TypeExtractor.simpleType)
+    val complexSubFields = extractField(innerSelectionTypes, TypeExtractor.complexType)
+    val simpleSelection = filterSelections(field, simpleSubfields.groupBy(_.name))
+    val complexSelection = filterSelections(field, complexSubFields.groupBy(_.name))
 
-    val simpleSubfields = extractField(innerTypes, TypeExtractor.simpleType)
-    val complexSubFields = extractField(innerTypes, TypeExtractor.complexType)
-    val simpleSelection = filterSelections(field, simpleSubfields)
-    val complexSelection = filterSelections(field, complexSubFields)
+    val simpleSubQuery = if (simpleSelection.isEmpty) None else Some(field.copy(selections = simpleSelection.map(_._1).toVector), simpleSelection.map(_._2).toSet)
 
-    val simpleSubQuery = if (simpleSelection.isEmpty) None else Some(field.copy(selections = simpleSelection.toVector))
+    val complexSubQuery: Seq[Some[(Field, Set[QueryType])]] = complexSelection
+      .map { case (field, qType) => (splitQuery(field, innerSelection), qType) }
+      .flatMap { case (value, queryType) => value.map { case (selection, types) => Some(field.copy(selections = Vector(selection)), types + queryType) } }.toList
 
-    val complexSubQuery = complexSelection
-      .map { case field: Field => splitQuery(field, innerTypes) }
-      .flatMap(x => {
-        x.map(y => Some(field.copy(selections = Vector(y))))
-      }).toList
-
-    (simpleSubQuery :: complexSubQuery).collect { case Some(value) => value }
+    (simpleSubQuery :: complexSubQuery.toList).collect { case Some(value) => value }
   }
 
   def mergeFields(fields: Vector[Selection]): Field = fields.collect { case a: Field => a }.reduce((a, b) => a.copy(selections = a.selections ++ b.selections))
@@ -63,6 +64,14 @@ class QueryAnalyzer {
     case OptionType(ofType) => resolveName(field, ofType, "_[option]")
     case ListType(ofType) => resolveName(field, ofType, "_[list]")
   }
+
+  def resolveType(input: Type) = input match {
+    case _: ListType[_] => QueryTypes.Collection
+    case _: ObjectType[_, _] => QueryTypes.Object
+    case _ => QueryTypes.Scalar
+  }
+
+  case class AnalyzedField(name: String, ofType: OutputType[_], label: QueryType)
 
   object FieldNameExtractor {
     def unapply(field: Field): Option[String] = Some(field.name)

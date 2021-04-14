@@ -1,5 +1,7 @@
 package analysis
 
+import benchmark.BenchmarkQueries
+import benchmark.BenchmarkQueries.Strategies
 import benchmark.api.QueriesSchema.benchmarkQuerySchema
 import model.SchemaDefinition
 import sangria.ast.Field
@@ -11,10 +13,18 @@ object PerformAnalysis extends App {
   val analyzer = new QueryAnalyzer
   val queryTypes = analyzer.getQueryTypes(benchmarkQuerySchema)
 
-  QueryParser.parse(Queries.z)
+  QueryParser.parse(BenchmarkQueries.q1(Strategies.Async))
     .map(analyzer.extractValues)
     .map(_.head.head.asInstanceOf[Field])
     .map(analyzer.splitQuery(_, queryTypes))
-    .map(_.map(_.renderPretty))
-    .map(_.map(println))
+    .map(_.map(x => (x._1.renderPretty, x._2)))
+    .map(_.map(x => println(s"${x._2.mkString("[", ",", "]")}\n${x._1}")))
+
+  object QueryTypes extends Enumeration {
+    type QueryType = Value
+    val Scalar, Object, Collection, Unknown = Value
+  }
+
 }
+
+
