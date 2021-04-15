@@ -2,7 +2,7 @@ package analysis
 
 import benchmark.BenchmarkQueries
 import benchmark.BenchmarkQueries.Strategies
-import benchmark.api.QueriesSchema.benchmarkQuerySchema
+import benchmark.api.async.QueriesSchema.asyncSchema
 import model.SchemaDefinition
 import sangria.ast.Field
 import sangria.parser.QueryParser
@@ -11,7 +11,7 @@ object PerformAnalysis extends App {
 
   val schemaDefinition = SchemaDefinition.StarWarsSchema
   val analyzer = new QueryAnalyzer
-  val queryTypes = analyzer.getQueryTypes(benchmarkQuerySchema)
+  val queryTypes = analyzer.getQueryTypes(asyncSchema)
 
   QueryParser.parse(BenchmarkQueries.q1(Strategies.Async))
     .map(analyzer.extractValues)

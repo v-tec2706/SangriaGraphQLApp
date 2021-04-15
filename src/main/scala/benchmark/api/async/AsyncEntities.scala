@@ -1,10 +1,11 @@
-package benchmark.api
+package benchmark.api.async
 
-import benchmark.Execution._
-import benchmark.api.CustomTypesSchema._
+import benchmark.Execution.ex
+import benchmark.api.CustomTypesSchema.GQLDate
+import benchmark.api.{Arguments, CommonEntities}
 import benchmark.entities._
 import benchmark.resolver.MainResolver
-import sangria.schema._
+import sangria.schema.{Field, IntType, ListType, LongType, ObjectType, StringType, fields}
 
 import java.time.LocalDate
 import scala.concurrent.Future

@@ -1,5 +1,6 @@
 package benchmark
 
+import benchmark.BenchmarkQueries.Strategies.Strategy
 import io.circe.Json
 import io.circe.parser.parse
 import sangria.execution.Executor
@@ -13,7 +14,9 @@ import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 
-class Execution[Ctx](resolver: Ctx, schema: Schema[Ctx, Unit], deferredResolver: Option[DeferredResolver[Ctx]] = None) {
+class Execution[Ctx](resolver: Ctx, schema: Schema[Ctx, Unit], deferredResolver: Option[DeferredResolver[Ctx]] = None, strategy: Strategy) {
+
+  def strategy(s: Strategy): Boolean = strategy == s
 
   def graphql(query: String): Future[Json] = executeQuery(query)
 

@@ -1,12 +1,13 @@
-package benchmark.api
+package benchmark.api.batch
 
-import benchmark.Execution._
-import benchmark.api.CustomTypesSchema._
+import benchmark.Execution.ex
+import benchmark.api.CustomTypesSchema.GQLDate
+import benchmark.api.{Arguments, CommonEntities}
 import benchmark.entities._
 import benchmark.resolver.MessageResolver.batchedMessageResolver
 import benchmark.resolver.PersonResolver.batchedPersonResolver
 import benchmark.resolver._
-import sangria.schema._
+import sangria.schema.{Field, IntType, ListType, LongType, ObjectType, StringType, fields}
 
 import java.time.LocalDate
 

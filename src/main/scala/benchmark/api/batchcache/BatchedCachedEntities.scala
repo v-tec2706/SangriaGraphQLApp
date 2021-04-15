@@ -1,20 +1,17 @@
-package benchmark.api
+package benchmark.api.batchcache
 
-import benchmark.Execution._
-import benchmark.api.CustomTypesSchema._
+import benchmark.Execution.ex
+import benchmark.api.CustomTypesSchema.GQLDate
+import benchmark.api.{Arguments, CommonEntities}
 import benchmark.entities._
-import benchmark.resolver.CityResolver.cachedCityResolver
-import benchmark.resolver.ContinentResolver.cachedContinentResolver
-import benchmark.resolver.CountryResolver.cachedCountryResolver
-import benchmark.resolver.MessageResolver.cachedMessageResolver
-import benchmark.resolver.PersonResolver.cachedPersonResolver
-import benchmark.resolver.UniversityResolver.cachedUniversityResolver
+import benchmark.resolver.MessageResolver.batchedCachedMessageResolver
+import benchmark.resolver.PersonResolver.batchedCachedPersonResolver
 import benchmark.resolver._
-import sangria.schema._
+import sangria.schema.{Field, IntType, ListType, LongType, ObjectType, StringType, fields}
 
 import java.time.LocalDate
 
-object CachedEntities {
+object BatchedCachedEntities {
   lazy val Person: ObjectType[MainResolver, Person] = ObjectType(
     "Person",
     () => fields[MainResolver, Person](
@@ -31,12 +28,12 @@ object CachedEntities {
       Field("messages", ListType(Message),
         resolve = ctx => {
           val z = ctx.ctx.messagesResolver.getBySender(ctx.value.id).map(_.toSet)
-          z.map(x => cachedMessageResolver.deferSeq(x.toList))
+          z.map(x => batchedCachedMessageResolver.deferSeq(x.toList))
         }),
       Field("knows", ListType(Person),
-        resolve = ctx => ctx.ctx.personResolver.knows(ctx.value.id).map(cachedPersonResolver.deferSeq)),
-      Field("city", City, resolve = ctx => cachedCityResolver.defer(ctx.value.cityId)),
-      Field("university", University, resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id).map(cachedUniversityResolver.defer)),
+        resolve = ctx => ctx.ctx.personResolver.knows(ctx.value.id).map(batchedCachedPersonResolver.deferSeq)),
+      Field("city", City, resolve = ctx => CityResolver.batchedCachedCityResolver.defer(ctx.value.cityId)),
+      Field("university", University, resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id).map(UniversityResolver.batchedUniversityResolver.defer)),
     )
   )
 
@@ -54,7 +51,7 @@ object CachedEntities {
       Field("speaks", ListType(StringType), resolve = _.value.speaks),
       Field("locationIP", StringType, resolve = _.value.locationIP),
       Field("messages", ListType(Message),
-        resolve = ctx => ctx.ctx.messagesResolver.getBySender(ctx.value.id).map(cachedMessageResolver.deferSeq)),
+        resolve = ctx => ctx.ctx.messagesResolver.getBySender(ctx.value.id).map(batchedCachedMessageResolver.deferSeq)),
       Field("knows", ListType(Person),
         arguments = Arguments.Year :: Arguments.Country :: Nil,
         resolve = ctx => {
@@ -65,10 +62,10 @@ object CachedEntities {
             country <- ctx.ctx.countryResolver.getCountryByName(ctx.arg(Arguments.Country)).map(_.id)
             companyLocatedIn <- ctx.ctx.companyResolver.getCompanies(workAt.map(_._2)).map(_.filter(_.countryId == country)).map(_.map(_.id))
             toFind = workAt.filter(x => companyLocatedIn.contains(x._2)).map(_._1)
-          } yield cachedPersonResolver.deferSeq(toFind.toList)
+          } yield batchedCachedPersonResolver.deferSeq(toFind.toList)
         }),
-      Field("city", City, resolve = ctx => cachedCityResolver.defer(ctx.value.cityId)),
-      Field("university", University, resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id).map(cachedUniversityResolver.defer)),
+      Field("city", City, resolve = ctx => CityResolver.batchedCachedCityResolver.defer(ctx.value.cityId)),
+      Field("university", University, resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id).map(UniversityResolver.batchedCachedUniversityResolver.defer)),
     )
   )
 
@@ -78,7 +75,7 @@ object CachedEntities {
       Field("id", LongType, resolve = _.value.id),
       Field("name", StringType, resolve = _.value.name),
       Field("url", StringType, resolve = _.value.url),
-      Field("country", Country, resolve = ctx => cachedCountryResolver.defer(ctx.value.countryId))
+      Field("country", Country, resolve = ctx => CountryResolver.batchedCachedCountryResolver.defer(ctx.value.countryId))
     )
   )
 
@@ -88,7 +85,7 @@ object CachedEntities {
       Field("id", LongType, resolve = _.value.id),
       Field("name", StringType, resolve = _.value.name),
       Field("url", StringType, resolve = _.value.url),
-      Field("continent", CommonEntities.Continent, resolve = ctx => cachedContinentResolver.defer(ctx.value.continentId))
+      Field("continent", CommonEntities.Continent, resolve = ctx => ContinentResolver.batchedCachedContinentResolver.defer(ctx.value.continentId))
     )
   )
 
@@ -98,7 +95,7 @@ object CachedEntities {
       Field("id", LongType, resolve = _.value.id),
       Field("name", StringType, resolve = _.value.name),
       Field("url", StringType, resolve = _.value.url),
-      Field("city", City, resolve = ctx => cachedCityResolver.defer(ctx.value.cityId))
+      Field("city", City, resolve = ctx => CityResolver.batchedCachedCityResolver.defer(ctx.value.cityId))
     )
   )
 
@@ -106,8 +103,8 @@ object CachedEntities {
     "Message",
     () => fields[MainResolver, Message](
       Field("id", LongType, resolve = _.value.id),
-      Field("country", Country, resolve = ctx => cachedCountryResolver.defer(ctx.value.countryId)),
-      Field("person", Person, resolve = ctx => cachedPersonResolver.defer(ctx.value.personId)),
+      Field("country", Country, resolve = ctx => CountryResolver.batchedCachedCountryResolver.defer(ctx.value.countryId)),
+      Field("person", Person, resolve = ctx => PersonResolver.batchedCachedPersonResolver.defer(ctx.value.personId)),
       Field("content", StringType, resolve = _.value.content),
       Field("length", IntType, resolve = _.value.length),
       Field("browserUsed", StringType, resolve = _.value.browserUsed),

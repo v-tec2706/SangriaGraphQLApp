@@ -11,7 +11,7 @@ object BenchmarkQueries {
   val q1: Strategy => String = strategy =>
     s"""
       query q1 {
-        person$strategy(id: 4) {
+        person(id: 4) {
           firstName
           lastName
           city {
@@ -68,7 +68,7 @@ object BenchmarkQueries {
   val q2: Strategy => String = strategy =>
     s"""
       query q1 {
-        personWithArgs$strategy(id: 100) {
+        personWithArgs(id: 100) {
           firstName
           lastName
           knows(year: 2000, country: "country-5") {
@@ -86,7 +86,7 @@ object BenchmarkQueries {
   val q3: Strategy => String = strategy =>
     s"""
       query q3 {
-        person$strategy(id: 780) {
+        person(id: 780) {
            knows {
              id
              messages {
@@ -104,7 +104,7 @@ object BenchmarkQueries {
   val q4: Strategy => String = strategy =>
     s"""
       query q4 {
-        person$strategy(id: 780) {
+        person(id: 780) {
            knows {
              knows {
                id
@@ -124,7 +124,7 @@ object BenchmarkQueries {
   val q5: Strategy => String = strategy =>
     s"""
       query q5 {
-        person$strategy(id: 780) {
+        person(id: 780) {
           firstName
           knows {
             messages {
@@ -156,7 +156,7 @@ Test: check overhead of the resolver
   val q6: Strategy => String = strategy =>
     s"""
       query q6 {
-        person$strategy(id: 780) {
+        person(id: 780) {
           firstName
           lastName
           gender
@@ -176,7 +176,7 @@ Test: check added calculation time in case where only a small number of fields q
   val q7: Strategy => String = strategy =>
     s"""
       query q7 {
-       q7_1:  person$strategy(id: 1) {
+       q7_1:  person(id: 1) {
            firstName
            university {
              id
@@ -191,7 +191,7 @@ Test: check added calculation time in case where only a small number of fields q
              }
           }
        }
-       q7_2:  person$strategy(id: 1) {
+       q7_2:  person(id: 1) {
            firstName
            lastName
            university {
@@ -211,7 +211,7 @@ Test: check added calculation time in case where only a small number of fields q
              }
           }
        }
-        q7_3:  person$strategy(id: 1) {
+        q7_3:  person(id: 1) {
            firstName
            lastName
            gender
@@ -245,7 +245,7 @@ Test: check ability to resolve extremely expensive query (expected result or tim
   val q8: Strategy => String = strategy =>
     s"""
       query q4 {
-        person$strategy(id: 1) {
+        person(id: 1) {
            knows {
              id
              knows {

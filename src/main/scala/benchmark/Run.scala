@@ -2,24 +2,21 @@ package benchmark
 
 import benchmark.BenchmarkQueries.{Strategies, all}
 import benchmark.Execution.{ex, stop}
-import benchmark.api.QueriesSchema
+import benchmark.api.async.QueriesSchema
 import benchmark.resolver._
 import io.circe.Json
-import sangria.execution.deferred.DeferredResolver
 
 import scala.concurrent.Future
 
 object Run extends App {
 
-  val resolvers: DeferredResolver[MainResolver] = DeferredResolver.fetchers(
-    CityResolver.cachedCityResolver, CityResolver.batchedCityResolver, CityResolver.batchedCachedCityResolver,
-    MessageResolver.cachedMessageResolver, MessageResolver.batchedMessageResolver, MessageResolver.batchedCachedMessageResolver,
-    ContinentResolver.batchedContinentResolver, ContinentResolver.cachedContinentResolver, ContinentResolver.batchedCachedContinentResolver,
-    CountryResolver.cachedCountryResolver, CountryResolver.batchedCountryResolver, CountryResolver.batchedCachedCountryResolver,
-    PersonResolver.cachedPersonResolver, PersonResolver.batchedPersonResolver, PersonResolver.batchedCachedPersonResolver,
-    UniversityResolver.cachedUniversityResolver, UniversityResolver.batchedCachedUniversityResolver, UniversityResolver.batchedUniversityResolver
+  val executors = List(new Execution(MainResolver.build, QueriesSchema.asyncSchema, None, Strategies.Async),
+    new Execution(MainResolver.build, api.batch.QueriesSchema.batchedSchema, Some(api.batch.QueriesSchema.batchedResolvers), Strategies.Batched),
+    new Execution(MainResolver.build, api.cache.QueriesSchema.cachedSchema, Some(api.cache.QueriesSchema.cachedResolvers), Strategies.Cached),
+    new Execution(MainResolver.build, api.batchcache.QueriesSchema.batchedCachedSchema, Some(api.batchcache.QueriesSchema.batchedCachedResolvers), Strategies.BatchedCached)
   )
-  val execution = new Execution(MainResolver.build, QueriesSchema.benchmarkQuerySchema, Some(resolvers))
+
+  val strategyToUse = strategy.getOrElse(Strategies.Async)
 
   def strategy: Option[Strategies.Strategy] = args.toList match {
     case List(s) => Some(resolveStrategy(s))
@@ -34,12 +31,14 @@ object Run extends App {
     case _ => println("Unknown strategy, using default"); Strategies.Async
   }
 
-  val strategyToUse = strategy.getOrElse(Strategies.Async)
   println(s"Using strategy: $strategyToUse")
-  Future.sequence(all(strategyToUse)
-    .map { case (name, q) => (name, execution.graphql(q)) }
-    .map { case (name, res) => res.map(res => processResult(name, res)) }
-  ).onComplete(_ => stop())
+  executors.find(_.strategy(strategyToUse)).map(resolver => {
+    Future.sequence(all(strategyToUse)
+      .map { case (name, q) => (name, resolver.graphql(q)) }
+      .map { case (name, res) => res.map(res => processResult(name, res)) }
+    ).onComplete(_ => stop())
+  })
+
 
   //    execution.graphql(BenchmarkQueries.q).onComplete(x => {
   //      println(x)
@@ -47,6 +46,7 @@ object Run extends App {
   //    })
 
   def processResult: (String, Json) => Unit = (name, res) => {
+    println(res)
     res.hcursor.downField("extensions")
       .downField("tracing")
       .downField("duration")
