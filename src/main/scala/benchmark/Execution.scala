@@ -3,6 +3,7 @@ package benchmark
 import benchmark.BenchmarkQueries.Strategies.Strategy
 import io.circe.Json
 import io.circe.parser.parse
+import sangria.ast.Document
 import sangria.execution.Executor
 import sangria.execution.deferred.DeferredResolver
 import sangria.marshalling.circe._
@@ -16,18 +17,15 @@ import scala.util.{Failure, Success}
 
 class Execution[Ctx](resolver: Ctx, schema: Schema[Ctx, Unit], deferredResolver: Option[DeferredResolver[Ctx]] = None, strategy: Strategy) {
 
+  implicit val ec: ExecutionContextExecutor = Execution.ex
+
   def strategy(s: Strategy): Boolean = strategy == s
 
   def graphql(query: String): Future[Json] = executeQuery(query)
 
   private def executeQuery(query: String): Future[Json] = {
-    implicit val ec = Execution.ex
     QueryParser.parse(query) match {
-      case Success(queryAst) => Executor
-        .execute(schema, queryAst, resolver,
-          deferredResolver = deferredResolver.getOrElse(DeferredResolver.empty),
-          middleware = SlowLog.apolloTracing :: Nil
-        )
+      case Success(queryAst) => executeQuery(queryAst)
       case Failure(error: SyntaxError) => {
         println(s"Syntax error: $error")
         Future {
@@ -41,6 +39,11 @@ class Execution[Ctx](resolver: Ctx, schema: Schema[Ctx, Unit], deferredResolver:
       case Failure(error) => throw error
     }
   }
+
+  def executeQuery(query: Document): Future[Json] = Executor.execute(schema, query, resolver,
+    deferredResolver = deferredResolver.getOrElse(DeferredResolver.empty),
+    middleware = SlowLog.apolloTracing :: Nil
+  )
 }
 
 object Execution {
