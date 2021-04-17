@@ -1,7 +1,7 @@
 package benchmark.data.model
 
 import benchmark.data.model.PersonDb.PersonRecord
-import database.PostgresProfile$.api._
+import benchmark.repository.PostgresProfile$.api._
 
 import java.time.LocalDate
 

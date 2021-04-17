@@ -1,7 +1,4 @@
-import app.Application
-import app.Queries.humanCachedBatchedQuery
 import io.circe.Json
-import model.SchemaDefinition.StarWarsSchema
 
 import java.io.{BufferedWriter, File, FileWriter}
 import scala.concurrent.duration._
@@ -9,18 +6,18 @@ import scala.concurrent.{Await, Future}
 
 object Main extends App {
 
-  private val app: Application = new Application
-  println(StarWarsSchema.renderPretty)
+  //  private val app: Applicateion = new Application
+  //  println(StarWarsSchema.renderPretty)
 
   //  private val res1: Future[Json] = app.graphql(baseQuery, None, None)
   //  private val res2: Future[Json] = app.graphql(humanDeferredQuery, None, None)
   //  private val res3: Future[Json] = app.graphql(humanCachedQuery, None, None)
-  private val res4: Future[Json] = app.graphql(humanCachedBatchedQuery, None, None)
+  //  private val res4: Future[Json] = app.graphql(humanCachedBatchedQuery, None, None)
 
   //  handleTimeRes(res1, 1)
   //  handleTimeRes(res2, 2)
   //  handleTimeRes(res3, 3)
-  handleTimeRes(res4, 4)
+  //  handleTimeRes(res4, 4)
 
   def handleResVerbose(res: Future[Json]) = {
     println("====================")

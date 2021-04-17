@@ -3,13 +3,11 @@ package analysis
 import benchmark.BenchmarkQueries
 import benchmark.BenchmarkQueries.Strategies
 import benchmark.api.async.QueriesSchema.asyncSchema
-import model.SchemaDefinition
 import sangria.ast.Field
 import sangria.parser.QueryParser
 
 object PerformAnalysis extends App {
 
-  val schemaDefinition = SchemaDefinition.StarWarsSchema
   val analyzer = new QueryAnalyzer
   val queryTypes = analyzer.getQueryTypes(asyncSchema)
 

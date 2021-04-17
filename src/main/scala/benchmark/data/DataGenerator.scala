@@ -13,7 +13,7 @@ import benchmark.data.model.TagClassDb.TagClassRecord
 import benchmark.data.model.TopicDb.TopicRecord
 import benchmark.data.model.UniversityDb.UniversityRecord
 import benchmark.data.model._
-import database.Repository
+import benchmark.repository.Repository
 import slick.dbio.{DBIO, DBIOAction, Effect, NoStream}
 import slick.jdbc.H2Profile.api._
 import slick.lifted.TableQuery
