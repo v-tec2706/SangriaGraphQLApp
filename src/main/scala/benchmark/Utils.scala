@@ -8,7 +8,7 @@ object Utils {
     case _ => None
   }
 
-  def resolveStrategy(arg: String): Strategies.Strategy = arg match {
+  def resolveStrategy(arg: String): Strategies.Strategy = arg.toLowerCase match {
     case "async" => Strategies.Async
     case "batched" => Strategies.Batched
     case "cached" => Strategies.Cached

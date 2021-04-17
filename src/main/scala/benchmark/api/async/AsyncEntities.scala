@@ -5,7 +5,10 @@ import benchmark.api.CustomTypesSchema.GQLDate
 import benchmark.api.{Arguments, CommonEntities}
 import benchmark.entities._
 import benchmark.resolver.MainResolver
-import sangria.schema.{Field, IntType, ListType, LongType, ObjectType, StringType, fields}
+import io.circe.Json
+import io.circe.generic.semiauto._
+import sangria.federation._
+import sangria.schema._
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -41,6 +44,7 @@ object AsyncEntities {
     )
   )
 
+  implicit val decoder: Decoder[Json, PersonArg] = deriveDecoder[PersonArg].decodeJson(_)
   lazy val PersonWithArgs: ObjectType[MainResolver, Person] = ObjectType(
     "Person",
     () => fields[MainResolver, Person](
@@ -78,7 +82,6 @@ object AsyncEntities {
       } yield university),
     )
   )
-
   lazy val City: ObjectType[MainResolver, City] = ObjectType(
     "City",
     () => fields[MainResolver, City](
@@ -88,7 +91,6 @@ object AsyncEntities {
       Field("country", Country, resolve = ctx => ctx.ctx.countryResolver.getCountry(ctx.value.countryId))
     )
   )
-
   lazy val Country: ObjectType[MainResolver, Country] = ObjectType(
     "Country",
     () => fields[MainResolver, Country](
@@ -98,7 +100,6 @@ object AsyncEntities {
       Field("continent", CommonEntities.Continent, resolve = ctx => ctx.ctx.continentResolver.getContinent(ctx.value.continentId))
     )
   )
-
   lazy val University: ObjectType[MainResolver, University] = ObjectType(
     "University",
     () => fields[MainResolver, University](
@@ -108,7 +109,6 @@ object AsyncEntities {
       Field("city", City, resolve = ctx => ctx.ctx.cityResolver.getCity(ctx.value.cityId))
     )
   )
-
   lazy val Message: ObjectType[MainResolver, Message] = ObjectType(
     "Message",
     () => fields[MainResolver, Message](
@@ -122,4 +122,12 @@ object AsyncEntities {
       Field("locationIP", StringType, resolve = _.value.locationIP),
     )
   )
+
+  def personResolverF(env: MainResolver): EntityResolver[MainResolver, Json] = EntityResolver[MainResolver, Json, Person, PersonArg](
+    __typeName = "Person",
+    arg => env.personResolver.getPersonBlocking(arg.id)
+  )
+
+  case class PersonArg(id: Long)
+
 }

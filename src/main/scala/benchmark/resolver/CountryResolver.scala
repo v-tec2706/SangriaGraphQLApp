@@ -18,14 +18,17 @@ case class CountryResolver(countryRepository: CountryRepository) extends Resolve
 
 object CountryResolver {
   implicit val hasId: HasId[Country, Long] = HasId[Country, Long](_.id)
-  val batchedCountryResolver: Fetcher[MainResolver, Country, Country, Long] = Fetcher((ctx: MainResolver, ids: Seq[Long]) => ctx.countryResolver.getCountries(ids))
+  val batchedCountryResolver: Fetcher[MainResolver, Country, Country, Long] =
+    Fetcher((ctx: MainResolver, ids: Seq[Long]) => ctx.countryResolver.getCountries(ids))
   val cachedCountryResolver: Fetcher[MainResolver, Country, Country, Long] = Fetcher(
     config = FetcherConfig.caching(FetcherCache.simple),
     fetch = (ctx: MainResolver, ids: Seq[Long]) => {
-      val seq: Seq[DBIOAction[Country, NoStream, Effect.All]] = ids.map(id => ctx.countryResolver.countryRepository.getCountry(id).map(_.head))
+      val seq: Seq[DBIOAction[Country, NoStream, Effect.All]] =
+        ids.map(id => ctx.countryResolver.countryRepository.getCountry(id).map(_.head))
       val dbioSeq: DBIOAction[Seq[Country], NoStream, Effect.All] = DBIO.sequence(seq)
       Repository.database.run(dbioSeq)
-    })
+    }
+  )
   val batchedCachedCountryResolver: Fetcher[MainResolver, Country, Country, Long] = Fetcher(
     config = FetcherConfig.caching(FetcherCache.simple),
     fetch = (ctx: MainResolver, ids: Seq[Long]) => ctx.countryResolver.getCountries(ids)

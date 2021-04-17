@@ -11,6 +11,7 @@ libraryDependencies ++= Seq(
   "org.sangria-graphql" %% "sangria" % sangriaVersion,
   "org.sangria-graphql" %% "sangria-slowlog" % sangriaVersion,
   "org.sangria-graphql" %% "sangria-circe" % "1.3.1",
+  "org.sangria-graphql" %% "sangria-federated" % "0.0.2",
 
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,

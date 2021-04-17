@@ -6,10 +6,13 @@ import benchmark.repository.{PersonRepository, Repository}
 import sangria.execution.deferred.{Fetcher, FetcherCache, FetcherConfig, HasId}
 import slick.dbio.{DBIO, DBIOAction, Effect, NoStream}
 
-import scala.concurrent.Future
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, Future}
 
 case class PersonResolver(personRepository: PersonRepository) extends Resolver {
   def getPerson(id: Long): Future[Person] = Repository.database.run(personRepository.getPerson(id).map(_.head))
+
+  def getPersonBlocking(id: Long): Option[Person] = Await.result(getPerson(id).map(Some(_)), 3.seconds)
 
   def getPersonByName(name: String): Future[Person] = Repository.database.run(personRepository.getPerson(name).map(_.head))
 
