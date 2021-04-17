@@ -12,7 +12,8 @@ class CompanyDb(tag: Tag) extends Table[CompanyRecord](tag, "Company") {
 
   def url = column[String]("url")
 
-  def countryFk = foreignKey("countryFk", countryId, CountryDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def countryFk =
+    foreignKey("countryFk", countryId, CountryDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
   def countryId = column[Long]("countryId")
 }
@@ -21,5 +22,3 @@ object CompanyDb {
   type CompanyRecord = (Long, Long, String, String)
   val table = TableQuery[CompanyDb]
 }
-
-

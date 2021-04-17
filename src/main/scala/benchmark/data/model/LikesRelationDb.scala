@@ -9,9 +9,11 @@ class LikesRelationDb(tag: Tag) extends Table[(Long, Long)](tag, "LikesRelation"
 
   def messageId = column[Long]("messageId")
 
-  def personFk = foreignKey("personFk", personId, PersonDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def personFk =
+    foreignKey("personFk", personId, PersonDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
-  def messageFk = foreignKey("messageFk", messageId, MessageDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def messageFk =
+    foreignKey("messageFk", messageId, MessageDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 }
 
 object LikesRelationDb {

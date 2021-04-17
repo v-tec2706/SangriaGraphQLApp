@@ -12,7 +12,8 @@ class UniversityDb(tag: Tag) extends Table[UniversityRecord](tag, "University") 
 
   def url = column[String]("url")
 
-  def cityFk = foreignKey("cityFk", cityId, CountryDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def cityFk =
+    foreignKey("cityFk", cityId, CountryDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
   def cityId = column[Long]("cityId")
 }

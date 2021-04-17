@@ -1,15 +1,13 @@
 package service
 
+import app.MyExecutionContext.ex
 import database.{CharacterRepository, FriendsRepository, Repository}
 import model.CharacterEntity
-import service.CreatureService.{counter, inc}
+import service.CreatureService.inc
 import slick.dbio.Effect.All
 import slick.dbio.{DBIO, DBIOAction, NoStream}
 
-import java.util.concurrent.Executors
-import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import app.MyExecutionContext.ex
 
 class CreatureService(characterRepository: CharacterRepository, friendsRepository: FriendsRepository) {
 
@@ -44,7 +42,9 @@ class CreatureService(characterRepository: CharacterRepository, friendsRepositor
       friends <- friendsRepository.getFriendsByIds(ids)
       groupped = friends.groupBy(_.id).mapValues(x => x.map(_.friendId)).toMap
       z <- charactersData
-    } yield z.map(entity => CharacterEntity(entity.id, entity.name, groupped.getOrElse(entity.id, List.empty).toList, entity.appearsIn, entity.homePlanet))
+    } yield z.map(entity =>
+      CharacterEntity(entity.id, entity.name, groupped.getOrElse(entity.id, List.empty).toList, entity.appearsIn, entity.homePlanet)
+    )
   }
 }
 
@@ -54,5 +54,3 @@ object CreatureService {
     counter = counter + 1
   }
 }
-
-

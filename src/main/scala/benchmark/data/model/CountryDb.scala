@@ -14,11 +14,14 @@ class CountryDb(tag: Tag) extends Table[CountryRecord](tag, "Country") {
 
   def continentId = column[Long]("continentId")
 
-  def continentFk = foreignKey("continentFk", continentId, ContinentDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def continentFk = foreignKey("continentFk", continentId, ContinentDb.table)(
+    _.id,
+    onUpdate = ForeignKeyAction.Restrict,
+    onDelete = ForeignKeyAction.Cascade
+  )
 }
 
 object CountryDb {
   type CountryRecord = (Long, Long, String, String)
   val table = TableQuery[CountryDb]
 }
-

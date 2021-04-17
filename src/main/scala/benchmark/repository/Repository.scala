@@ -18,5 +18,3 @@ object Repository {
   lazy val database: Database = Database.forConfig(configPath)
   val configPath = "sangria"
 }
-
-

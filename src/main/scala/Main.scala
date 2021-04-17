@@ -29,7 +29,8 @@ object Main extends App {
 
   def handleRes(res: Future[Json], id: Int) = {
     println("====================")
-    Await.ready(res, Duration.Inf)
+    Await
+      .ready(res, Duration.Inf)
       .value
       .get
       //      .map(_.hcursor.downField("extensions")
@@ -49,19 +50,22 @@ object Main extends App {
 
   def handleTimeRes(res: Future[Json], id: Int) = {
     println("====================")
-    val k = Await.ready(res, Duration.Inf)
+    val k = Await
+      .ready(res, Duration.Inf)
       .value
       .get
-      .map(_.hcursor.downField("extensions")
-        .downField("tracing")
-        .downField("execution")
-        .downField("resolvers")
-        .values
-        .map(_.map(x => x.toString()))
-        .map(x => {
-          saveToFile(x.mkString("{\n  \"resolvers\": [\n", ",", "\n  ]\n}"), id)
-          println("Done")
-        })
+      .map(
+        _.hcursor
+          .downField("extensions")
+          .downField("tracing")
+          .downField("execution")
+          .downField("resolvers")
+          .values
+          .map(_.map(x => x.toString()))
+          .map(x => {
+            saveToFile(x.mkString("{\n  \"resolvers\": [\n", ",", "\n  ]\n}"), id)
+            println("Done")
+          })
       )
 
     //        .drop()

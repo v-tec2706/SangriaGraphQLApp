@@ -23,7 +23,12 @@ case class FriendsRepository(override val database: Database) extends Repository
     getByProperty[FriendType, FriendDB](TableQuery[FriendDB]) { friendDB: FriendDB => friendDB.id inSet ids }
   )
 
-  def mapResults_(result: Future[Seq[FriendType]]): Future[Seq[FriendsEntity]] = super.mapResults(result) { case (id, friendId) => FriendsEntity(id, friendId) }
-  def mapResults2_(result: DBIO[Seq[FriendType]]): DBIO[Seq[FriendsEntity]] = super.mapResults2(result) { case (id, friendId) => FriendsEntity(id, friendId) }
+  def mapResults_(result: Future[Seq[FriendType]]): Future[Seq[FriendsEntity]] = super.mapResults(result) { case (id, friendId) =>
+    FriendsEntity(id, friendId)
+  }
+
+  def mapResults2_(result: DBIO[Seq[FriendType]]): DBIO[Seq[FriendsEntity]] = super.mapResults2(result) { case (id, friendId) =>
+    FriendsEntity(id, friendId)
+  }
 
 }

@@ -18,7 +18,8 @@ case class UniversityRepository() extends Repository[UniversityRecord, Universit
 
   def getUniversities(ids: List[Long]): dbio.DBIO[Seq[University]] = get { u: UniversityDb => u.id inSet ids }.map(_.map(entity))
 
-  def studyAt(personId: Long): FixedSqlStreamingAction[Seq[Long], Long, Effect.Read] = StudyAtRelationDb.table.filter(_.personId === personId).map(_.universityId).result
+  def studyAt(personId: Long): FixedSqlStreamingAction[Seq[Long], Long, Effect.Read] =
+    StudyAtRelationDb.table.filter(_.personId === personId).map(_.universityId).result
 
   override def table: H2Profile.api.TableQuery[UniversityDb] = UniversityDb.table
 }

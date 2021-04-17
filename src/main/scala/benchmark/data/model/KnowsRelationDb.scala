@@ -7,14 +7,15 @@ class KnowsRelationDb(tag: Tag) extends Table[(Long, Long)](tag, "KnowsRelation"
 
   def friendId = column[Long]("friendId")
 
-  def personFk = foreignKey("personFk", personId, PersonDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def personFk =
+    foreignKey("personFk", personId, PersonDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
   def personId = column[Long]("personId")
 
-  def friendFk = foreignKey("friendFk", personId, PersonDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def friendFk =
+    foreignKey("friendFk", personId, PersonDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 }
 
 object KnowsRelationDb {
   val table = TableQuery[KnowsRelationDb]
 }
-

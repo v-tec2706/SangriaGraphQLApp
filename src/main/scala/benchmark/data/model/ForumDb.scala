@@ -14,7 +14,8 @@ class ForumDb(tag: Tag) extends Table[ForumRecord](tag, "Forum") {
 
   def creationDate = column[LocalDate]("creationDate")
 
-  def moderatorFk = foreignKey("moderatorId", moderatorId, PersonDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def moderatorFk =
+    foreignKey("moderatorId", moderatorId, PersonDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
   def moderatorId = column[Long]("moderatorId")
 }
@@ -23,4 +24,3 @@ object ForumDb {
   type ForumRecord = (Long, Long, String, LocalDate)
   val table = TableQuery[ForumDb]
 }
-

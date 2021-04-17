@@ -6,5 +6,5 @@ case class Forum(
                   id: Long,
                   moderatorId: Long,
                   title: String,
-                  creationDate: LocalDate,
+                  creationDate: LocalDate
                 )

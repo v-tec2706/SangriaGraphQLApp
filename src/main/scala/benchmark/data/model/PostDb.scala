@@ -12,7 +12,8 @@ class PostDb(tag: Tag) extends slick.jdbc.H2Profile.api.Table[PostRecord](tag, "
 
   def forumId = column[Long]("forumId")
 
-  def forumFk = foreignKey("forumFk", forumId, ForumDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def forumFk =
+    foreignKey("forumFk", forumId, ForumDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 }
 
 object PostDb {

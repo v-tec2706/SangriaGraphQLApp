@@ -21,14 +21,17 @@ case class CompanyResolver(companyRepository: CompanyRepository) extends Resolve
 
 object CompanyResolver {
   implicit val hasId: HasId[Company, Long] = HasId[Company, Long](_.id)
-  val batchedCompanyResolver: Fetcher[MainResolver, Company, Company, Long] = Fetcher((ctx: MainResolver, ids: Seq[Long]) => ctx.companyResolver.getCompanies(ids.toList))
+  val batchedCompanyResolver: Fetcher[MainResolver, Company, Company, Long] =
+    Fetcher((ctx: MainResolver, ids: Seq[Long]) => ctx.companyResolver.getCompanies(ids.toList))
   val cachedCompanyResolver: Fetcher[MainResolver, Company, Company, Long] = Fetcher(
     config = FetcherConfig.caching(FetcherCache.simple),
     fetch = (ctx: MainResolver, ids: Seq[Long]) => {
-      val seq: Seq[DBIOAction[Company, NoStream, Effect.All]] = ids.map(id => ctx.companyResolver.companyRepository.getCompany(id).map(_.head))
+      val seq: Seq[DBIOAction[Company, NoStream, Effect.All]] =
+        ids.map(id => ctx.companyResolver.companyRepository.getCompany(id).map(_.head))
       val dbioSeq: DBIOAction[Seq[Company], NoStream, Effect.All] = DBIO.sequence(seq)
       Repository.database.run(dbioSeq)
-    })
+    }
+  )
   val batchedCachedCompanyResolver: Fetcher[MainResolver, Company, Company, Long] = Fetcher(
     config = FetcherConfig.caching(FetcherCache.simple),
     fetch = (ctx: MainResolver, ids: Seq[Long]) => ctx.companyResolver.getCompanies(ids.toList)

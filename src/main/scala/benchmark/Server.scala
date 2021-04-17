@@ -17,7 +17,6 @@ import sangria.marshalling.circe._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-
 case class Server(strategy: Strategy, port: Int, executor: Execution) {
   implicit val system = ActorSystem("sangria-server")
 
@@ -32,7 +31,9 @@ case class Server(strategy: Strategy, port: Int, executor: Execution) {
         graphQLPlayground ~
           prepareGraphQLRequest {
             case Success(GraphQLRequest(query, _, _)) =>
-              val graphQLResponse = executor.executeQuery(query).map(OK -> _)
+              val graphQLResponse = executor
+                .executeQuery(query)
+                .map(OK -> _)
                 .recover {
                   case error: QueryAnalysisError => BadRequest -> error.resolveError
                   case error: ErrorWithResolver => InternalServerError -> error.resolveError

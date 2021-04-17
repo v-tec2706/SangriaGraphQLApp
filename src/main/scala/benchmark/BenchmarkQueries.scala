@@ -82,7 +82,7 @@ object BenchmarkQueries {
     small subset of fields is selected
     Test: check ability to optimize (chunk/batch) fetching collections with big size, and postpone projections to the end of
     execution
- */
+   */
   val q3: Strategy => String = strategy =>
     s"""
       query q3 {
@@ -100,7 +100,7 @@ object BenchmarkQueries {
   /*
   Query: Q4 - "messages of friends of friends" - query with multi element collections as subfields, collections will contain numerous duplicates (common friends)
   Test: check ability to reuse data which was already fetched
-  */
+   */
   val q4: Strategy => String = strategy =>
     s"""
       query q4 {
@@ -120,7 +120,7 @@ object BenchmarkQueries {
   /*
   Query: Q5 - duplicated sub queries - it's a common case when requests for data are generated automatically (e.q. from UI components)
   Test: check ability to detect and eliminate duplicates
-  */
+   */
   val q5: Strategy => String = strategy =>
     s"""
       query q5 {
@@ -152,7 +152,7 @@ object BenchmarkQueries {
   /*
 Query: Q6 - simple query without nested fields
 Test: check overhead of the resolver
-*/
+   */
   val q6: Strategy => String = strategy =>
     s"""
       query q6 {
@@ -172,7 +172,7 @@ Query: Q7 - branching query, different queries are used to fetch the same relati
 queried on each level differs between sub queries
 Test: check added calculation time in case where only a small number of fields queried multiple times on
  the same node
-*/
+   */
   val q7: Strategy => String = strategy =>
     s"""
       query q7 {
@@ -241,7 +241,7 @@ Test: check added calculation time in case where only a small number of fields q
   /*
 Query: Q8 - extreme blowup
 Test: check ability to resolve extremely expensive query (expected result or timout)
-*/
+   */
   val q8: Strategy => String = strategy =>
     s"""
       query q4 {
@@ -265,15 +265,9 @@ Test: check ability to resolve extremely expensive query (expected result or tim
       }
       """
 
-  val all: Strategy => List[(String, String)] = strategy => List(("q1", q1),
-    ("q2", q2),
-    ("q3", q3),
-    ("q4", q4),
-    ("q5", q4),
-    ("q6", q6),
-    ("q7", q7),
-    ("q8", q8))
-    .map { case (name, q) => (name, q.apply(strategy)) }
+  val all: Strategy => List[(String, String)] = strategy =>
+    List(("q1", q1), ("q2", q2), ("q3", q3), ("q4", q4), ("q5", q4), ("q6", q6), ("q7", q7), ("q8", q8))
+      .map { case (name, q) => (name, q.apply(strategy)) }
 
   object Strategies extends Enumeration {
     type Strategy = Value

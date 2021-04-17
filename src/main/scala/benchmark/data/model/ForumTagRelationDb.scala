@@ -7,7 +7,8 @@ class ForumTagRelationDb(tag: Tag) extends Table[(Long, Long)](tag, "ForumTagRel
 
   def tagId = column[Long]("tagId")
 
-  def forumFk = foreignKey("forumFk", forumId, ForumDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def forumFk =
+    foreignKey("forumFk", forumId, ForumDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
   def forumId = column[Long]("forumId")
 

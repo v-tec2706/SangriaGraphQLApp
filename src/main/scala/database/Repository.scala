@@ -1,22 +1,19 @@
 package database
 
+import app.MyExecutionContext.ex
 import slick.dbio.DBIO
 import slick.jdbc.H2Profile.api._
 import slick.jdbc.JdbcBackend.Database
 import slick.lifted.Rep
 
-import java.util.concurrent.Executors
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import app.MyExecutionContext.ex
 
 trait Repository {
   val database: Database
 
   def insert[S, A <: Table[S]](table: TableQuery[A], items: Seq[S]): DBIOAction[Unit, NoStream, Effect.Schema with Effect.Write] = {
-    DBIO.seq(
-      table.schema.createIfNotExists,
-      table ++= items)
+    DBIO.seq(table.schema.createIfNotExists, table ++= items)
   }
 
   def getByProperty[B, A <: Table[B]](tableQuery: TableQuery[A])(f: A => Rep[Boolean]): Future[Seq[B]] = {
@@ -46,4 +43,3 @@ object Repository {
   lazy val database: Database = Database.forConfig(configPath)
   val configPath = "sangria"
 }
-

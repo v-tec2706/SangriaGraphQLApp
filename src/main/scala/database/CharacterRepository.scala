@@ -25,7 +25,9 @@ case class CharacterRepository(override val database: Database) extends Reposito
   }
 
   def getCharacterByIds(ids: List[Int]): Future[List[CharacterEntry]] = {
-    characterGetBy({ character: CharacterDB => character.id inSet ids }).map(_.map { case (i: Int, n: String, m: String, k: String) => CharacterEntry(i, n, m, k) }).map(x => x.toList)
+    characterGetBy({ character: CharacterDB => character.id inSet ids })
+      .map(_.map { case (i: Int, n: String, m: String, k: String) => CharacterEntry(i, n, m, k) })
+      .map(x => x.toList)
   }
 
   private def characterGetBy[A]: (CharacterDB => Rep[Boolean]) => Future[Seq[CharacterType]] = {

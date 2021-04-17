@@ -5,7 +5,8 @@ import slick.jdbc.H2Profile.api._
 class MessageTagRelationDb(tag: Tag) extends Table[(Long, Long)](tag, "MessageTagRelation") {
   override def * = (messageId, tagId)
 
-  def messageFk = foreignKey("messageFk", messageId, MessageDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def messageFk =
+    foreignKey("messageFk", messageId, MessageDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
   def messageId = column[Long]("messageId")
 

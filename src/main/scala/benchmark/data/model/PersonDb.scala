@@ -37,7 +37,3 @@ object PersonDb {
   type PersonRecord = (Long, Long, String, String, String, LocalDate, String, LocalDate, List[String], List[String], String)
   val table = TableQuery[PersonDb]
 }
-
-
-
-

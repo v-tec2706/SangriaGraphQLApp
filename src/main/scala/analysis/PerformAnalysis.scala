@@ -13,7 +13,8 @@ object PerformAnalysis extends App {
   val analyzer = new QueryAnalyzer
   val queryTypes = analyzer.getQueryTypes(asyncSchema)
 
-  QueryParser.parse(BenchmarkQueries.q1(Strategies.Async))
+  QueryParser
+    .parse(BenchmarkQueries.q1(Strategies.Async))
     .map(analyzer.extractValues)
     .map(_.head.head.asInstanceOf[Field])
     .map(analyzer.splitQuery(_, queryTypes))
@@ -26,5 +27,3 @@ object PerformAnalysis extends App {
   }
 
 }
-
-

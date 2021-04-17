@@ -36,12 +36,19 @@ object SangriaAkkaHttp {
 
   def formatError(error: Throwable): Json = error match {
     case syntaxError: SyntaxError =>
-      Json.obj("errors" -> Json.arr(
-        Json.obj(
-          "message" -> Json.fromString(syntaxError.getMessage),
-          "locations" -> Json.arr(Json.obj(
-            "line" -> Json.fromBigInt(syntaxError.originalError.position.line),
-            "column" -> Json.fromBigInt(syntaxError.originalError.position.column))))))
+      Json.obj(
+        "errors" -> Json.arr(
+          Json.obj(
+            "message" -> Json.fromString(syntaxError.getMessage),
+            "locations" -> Json.arr(
+              Json.obj(
+                "line" -> Json.fromBigInt(syntaxError.originalError.position.line),
+                "column" -> Json.fromBigInt(syntaxError.originalError.position.column)
+              )
+            )
+          )
+        )
+      )
     case NonFatal(e) =>
       formatError(e.getMessage)
     case e =>
@@ -136,8 +143,7 @@ object SangriaAkkaHttp {
       }
     }
 
-  final case class MalformedRequest(private val message: String = "",
-                                    private val cause: Throwable = None.orNull)
+  final case class MalformedRequest(private val message: String = "", private val cause: Throwable = None.orNull)
     extends Exception(message, cause)
 
 }

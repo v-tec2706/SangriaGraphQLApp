@@ -14,7 +14,8 @@ class CityDb(tag: Tag) extends Table[CityRecord](tag, "City") {
 
   def countryId = column[Long]("countryId")
 
-  def countryFk = foreignKey("countryFk", countryId, CountryDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+  def countryFk =
+    foreignKey("countryFk", countryId, CountryDb.table)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 }
 
 object CityDb {

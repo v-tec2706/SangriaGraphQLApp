@@ -24,6 +24,3 @@ object CharacterDB {
   type CharacterType = (Int, String, String, String)
   val characters: TableQuery[CharacterDB] = TableQuery[CharacterDB]
 }
-
-
-
