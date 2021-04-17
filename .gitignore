@@ -3,3 +3,5 @@
 /target/
 /target/scala-2.13/classes/
 /results
+/gateway/node_modules
+/gateway/package-lock.json

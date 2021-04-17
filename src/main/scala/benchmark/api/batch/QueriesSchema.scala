@@ -15,12 +15,19 @@ object QueriesSchema {
     UniversityResolver.batchedUniversityResolver
   )
   val query: ObjectType[MainResolver, Unit] = ObjectType(
-    "Query", fields[MainResolver, Unit](
-      Field("person", BatchedEntities.Person, arguments = Id :: Nil,
-        resolve = ctx => PersonResolver.batchedPersonResolver.defer(ctx.arg(Id))
+    "Query",
+    fields[MainResolver, Unit](
+      Field(
+        "personBatched",
+        BatchedEntities.Person,
+        arguments = Id :: Nil,
+        resolve = ctx => PersonResolver.batchedPersonResolver.defer(ctx.arg(Id).toLong)
       ),
-      Field("personWithArgs", BatchedEntities.PersonWithArgs, arguments = Id :: Nil,
-        resolve = ctx => PersonResolver.batchedPersonResolver.defer(ctx.arg(Id))
+      Field(
+        "personWithArgsBatched",
+        BatchedEntities.PersonWithArgs,
+        arguments = Id :: Nil,
+        resolve = ctx => PersonResolver.batchedPersonResolver.defer(ctx.arg(Id).toLong)
       )
     )
   )

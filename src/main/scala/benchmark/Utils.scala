@@ -12,7 +12,7 @@ object Utils {
     case "async" => Strategies.Async
     case "batched" => Strategies.Batched
     case "cached" => Strategies.Cached
-    case "batchedCached" => Strategies.BatchedCached
+    case "batchedcached" => Strategies.BatchedCached
     case _ => println("Unknown strategy, using default"); Strategies.Async
   }
 }

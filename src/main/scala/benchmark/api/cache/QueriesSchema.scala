@@ -15,12 +15,19 @@ object QueriesSchema {
     UniversityResolver.cachedUniversityResolver
   )
   val query: ObjectType[MainResolver, Unit] = ObjectType(
-    "Query", fields[MainResolver, Unit](
-      Field("person", CachedEntities.Person, arguments = Id :: Nil,
-        resolve = ctx => PersonResolver.cachedPersonResolver.defer(ctx.arg(Id))
+    "Query",
+    fields[MainResolver, Unit](
+      Field(
+        "personCached",
+        CachedEntities.Person,
+        arguments = Id :: Nil,
+        resolve = ctx => PersonResolver.cachedPersonResolver.defer(ctx.arg(Id).toLong)
       ),
-      Field("personWithArgs", CachedEntities.PersonWithArgs, arguments = Id :: Nil,
-        resolve = ctx => PersonResolver.cachedPersonResolver.defer(ctx.arg(Id))
+      Field(
+        "personWithArgsCached",
+        CachedEntities.PersonWithArgs,
+        arguments = Id :: Nil,
+        resolve = ctx => PersonResolver.cachedPersonResolver.defer(ctx.arg(Id).toLong)
       )
     )
   )

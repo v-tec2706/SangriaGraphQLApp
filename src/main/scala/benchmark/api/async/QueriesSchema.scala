@@ -7,11 +7,11 @@ import sangria.schema.{Field, FutureValue, ObjectType, Schema, fields}
 object QueriesSchema {
   val query: ObjectType[MainResolver, Unit] = ObjectType(
     "Query", fields[MainResolver, Unit](
-      Field("person", AsyncEntities.Person, arguments = Id :: Nil,
-        resolve = ctx => FutureValue(ctx.ctx.personResolver.getPerson(ctx.arg(Id)))
+      Field("personAsync", AsyncEntities.Person, arguments = Id :: Nil,
+        resolve = ctx => FutureValue(ctx.ctx.personResolver.getPerson(ctx.arg(Id).toLong))
       ),
-      Field("personWithArgs", AsyncEntities.PersonWithArgs, arguments = Id :: Nil,
-        resolve = ctx => FutureValue(ctx.ctx.personResolver.getPerson(ctx.arg(Id)))
+      Field("personWithArgsAsync", AsyncEntities.PersonWithArgs, arguments = Id :: Nil,
+        resolve = ctx => FutureValue(ctx.ctx.personResolver.getPerson(ctx.arg(Id).toLong))
       )
     )
   )
