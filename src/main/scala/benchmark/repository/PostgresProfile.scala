@@ -1,4 +1,4 @@
-package database
+package benchmark.repository
 
 import com.github.tminglei.slickpg._
 import slick.basic.Capability

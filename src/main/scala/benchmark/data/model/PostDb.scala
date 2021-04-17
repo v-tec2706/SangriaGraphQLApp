@@ -1,7 +1,7 @@
 package benchmark.data.model
 
 import benchmark.data.model.PostDb.PostRecord
-import database.PostgresProfile$.api._
+import benchmark.repository.PostgresProfile$.api._
 
 class PostDb(tag: Tag) extends slick.jdbc.H2Profile.api.Table[PostRecord](tag, "Post") {
   override def * = (forumId, language, imageFile)
