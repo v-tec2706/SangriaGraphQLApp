@@ -28,7 +28,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,
   "de.heikoseeberger" %% "akka-http-circe" % "1.35.0",
 
-  "org.slf4j" % "slf4j-nop" % "1.6.4",
+"org.slf4j" % "slf4j-nop" % "1.6.4"
 )
 
 mainClass in assembly := Some("benchmark.Run")
