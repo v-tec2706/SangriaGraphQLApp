@@ -1,10 +1,13 @@
 package analysis
 
-import benchmark.BenchmarkQueries
 import benchmark.BenchmarkQueries.Strategies
+import benchmark.HttpClient.sendGraphQLRequest
 import benchmark.api.async.QueriesSchema.asyncSchema
+import benchmark.{BenchmarkQueries, HttpClient}
 import sangria.ast.Field
 import sangria.parser.QueryParser
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object PerformAnalysis extends App {
 
@@ -17,7 +20,15 @@ object PerformAnalysis extends App {
     .map(_.head.head.asInstanceOf[Field])
     .map(analyzer.splitQuery(_, queryTypes))
     .map(_.map(x => (x._1.renderPretty, x._2)))
-    .map(_.map(x => println(s"${x._2.mkString("[", ",", "]")}\n${x._1}")))
+    .map(_.map(x => s"{ ${assignStrategy(x._1, x._2)} }"))
+    .map(
+      _.map(
+        sendGraphQLRequest("8081", _)
+          .map(HttpClient.handleResponse(_, "q1", "async"))
+      ).map(_.map(println))
+    )
+
+  def assignStrategy(query: String, labels: Set[PerformAnalysis.QueryTypes.QueryType]): String = query
 
   object QueryTypes extends Enumeration {
     type QueryType = Value

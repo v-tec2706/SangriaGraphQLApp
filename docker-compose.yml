@@ -1,11 +1,62 @@
-version: '3'
+version: '3.4'
 services:
-  growthengine:
+  asyncserver:
     image: benchmark:latest
+    environment:
+      - BENCHMARK_DB=postgres
+    entrypoint: java -cp SangriaGraphQLApp-assembly-0.1.jar benchmark.federation.GraphQL
+    command: async 8081
+    ports:
+      - "8081:8081"
+
+  batchedserver:
+    image: benchmark:latest
+    environment:
+      - BENCHMARK_DB=postgres
+    entrypoint: java -cp SangriaGraphQLApp-assembly-0.1.jar benchmark.federation.GraphQL
+    command: batched 8082
+    ports:
+      - "8082:8082"
+
+  cachedserver:
+    image: benchmark:latest
+    environment:
+      - BENCHMARK_DB=postgres
+    entrypoint: java -cp SangriaGraphQLApp-assembly-0.1.jar benchmark.federation.GraphQL
+    command: cached 8083
+    ports:
+      - "8083:8083"
+
+  batchedcachedserver:
+    image: benchmark:latest
+    environment:
+      - BENCHMARK_DB=postgres
+    entrypoint: java -cp SangriaGraphQLApp-assembly-0.1.jar benchmark.federation.GraphQL
+    command: batchedCached 8084
+    ports:
+      - "8084:8084"
 
   postgres:
     image: postgres
     env_file:
-      - database.env
+      - src/main/scala/benchmark/federation/database.env
     ports:
       - "5432:5432"
+
+  dbInit:
+    image: benchmark:latest
+    environment:
+      - BENCHMARK_DB=postgres
+    entrypoint: java -cp SangriaGraphQLApp-assembly-0.1.jar benchmark.data.DataGenerator
+    depends_on:
+      - postgres
+
+  gateway:
+    links:
+      - asyncserver
+      - batchedserver
+      - cachedserver
+      - batchedcachedserver
+    image: federationgateway
+    ports:
+      - "9080:9080"

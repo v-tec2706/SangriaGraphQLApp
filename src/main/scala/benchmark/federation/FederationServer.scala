@@ -3,6 +3,7 @@ package benchmark.federation
 import akka.http.scaladsl.Http
 import benchmark.BenchmarkQueries.Strategies
 import benchmark.BenchmarkQueries.Strategies.Strategy
+import benchmark.Utils.{resolveExecutor, resolveSchema, resolveStrategy}
 import benchmark.api.async.AsyncEntities.personResolver
 import benchmark.resolver.MainResolver
 import benchmark.{FederatedExecutor, Server, api}
@@ -35,23 +36,37 @@ case class FederationServer(
 }
 
 object GraphQL extends App {
-  FederationServer(Strategies.Async, 8081, api.async.QueriesSchema.asyncSchema).start
-  FederationServer(
-    Strategies.Batched,
-    8082,
-    api.batch.QueriesSchema.batchedSchema,
-    Some(api.batch.QueriesSchema.batchedResolvers)
-  ).start
-  FederationServer(
-    Strategies.Cached,
-    8083,
-    api.cache.QueriesSchema.cachedSchema,
-    Some(api.cache.QueriesSchema.cachedResolvers)
-  ).start
-  FederationServer(
-    Strategies.BatchedCached,
-    8084,
-    api.batchcache.QueriesSchema.batchedCachedSchema,
-    Some(api.batchcache.QueriesSchema.batchedCachedResolvers)
-  ).start
+
+  val arguments = args.toList match {
+    case strategy :: port :: Nil => Some(resolveStrategy(strategy), port.toInt)
+    case _ => None
+  }
+
+  arguments match {
+    case Some(value) =>
+      val (strategy, port) = value; FederationServer(strategy, port, resolveSchema(strategy), resolveExecutor(strategy)).start
+    case None => runAll
+  }
+
+  def runAll = {
+    FederationServer(Strategies.Async, 8081, api.async.QueriesSchema.asyncSchema).start
+    FederationServer(
+      Strategies.Batched,
+      8082,
+      api.batch.QueriesSchema.batchedSchema,
+      Some(api.batch.QueriesSchema.batchedResolvers)
+    ).start
+    FederationServer(
+      Strategies.Cached,
+      8083,
+      api.cache.QueriesSchema.cachedSchema,
+      Some(api.cache.QueriesSchema.cachedResolvers)
+    ).start
+    FederationServer(
+      Strategies.BatchedCached,
+      8084,
+      api.batchcache.QueriesSchema.batchedCachedSchema,
+      Some(api.batchcache.QueriesSchema.batchedCachedResolvers)
+    ).start
+  }
 }

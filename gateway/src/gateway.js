@@ -1,26 +1,38 @@
 const {ApolloGateway} = require('@apollo/gateway');
 const {Server} = require('./server');
 
-const gateway = new ApolloGateway({
-  serviceList: [
-    {name: 'personAsync', url: 'http://localhost:8081/graphql'},
-    {name: 'personBatched', url: 'http://localhost:8082/graphql'},
-    {name: 'personCached', url: 'http://localhost:8083/graphql'},
-    {name: 'personBatchedCached', url: 'http://localhost:8084/graphql'}
-  ],
-  debug: true
-});
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-const port = 9080;
+async function run() {
+    console.log("waiting for start...")
+    await sleep(10000)
+    console.log("started...")
 
-(async () => {
+    const gateway = new ApolloGateway({
+        serviceList: [
+            {name: 'personAsync', url: 'http://asyncserver:8081/graphql'},
+            {name: 'personBatched', url: 'http://batchedserver:8082/graphql'},
+            {name: 'personCached', url: 'http://cachedserver:8083/graphql'},
+            {name: 'personBatchedCached', url: 'http://batchedcachedserver:8084/graphql'}
+        ],
+        debug: true
+    });
 
-  const server = new Server({
-    gateway,
-    subscriptions: false
-  });
+    const port = 9080;
 
-  server.listen({port: 9080}).then(({url}) => {
-    console.log(`🚀 Server ready at ${url}`)
-  })
-})();
+    (async () => {
+
+        const server = new Server({
+            gateway,
+            subscriptions: false
+        });
+
+        server.listen({port: 9080}).then(({url}) => {
+            console.log(`🚀 Server ready at ${url}`)
+        })
+    })();
+}
+
+run()
