@@ -39,7 +39,7 @@ services:
   postgres:
     image: postgres
     env_file:
-      - src/main/scala/benchmark/federation/database.env
+      - database.env
     ports:
       - "5432:5432"
 

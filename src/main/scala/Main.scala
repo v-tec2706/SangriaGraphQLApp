@@ -1,6 +1,6 @@
+import benchmark.Utils.saveToFile
 import io.circe.Json
 
-import java.io.{BufferedWriter, File, FileWriter}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
@@ -41,7 +41,7 @@ object Main extends App {
       //      .map(x => saveToFile(hits ++ "\n" ++ x.toString() ++ "\n", id))
       .map(x => {
         println(s"[$id] Done");
-        saveToFile(x.toString(), id)
+        saveToFile(x.toString(), "", "", "")
       })
   }
 
@@ -60,7 +60,7 @@ object Main extends App {
           .values
           .map(_.map(x => x.toString()))
           .map(x => {
-            saveToFile(x.mkString("{\n  \"resolvers\": [\n", ",", "\n  ]\n}"), id)
+            saveToFile(x.mkString("{\n  \"resolvers\": [\n", ",", "\n  ]\n}"), "id", "", "")
             println("Done")
           })
       )
@@ -81,13 +81,6 @@ object Main extends App {
     //            })
     //        }
     //        }
-  }
-
-  def saveToFile(text: String, id: Int): Unit = {
-    val file = new File("log-%s.json".format(id))
-    val bw = new BufferedWriter(new FileWriter(file, true))
-    bw.write(text)
-    bw.close()
   }
 
   //  val t1 = OffsetDateTime.parse("2021-03-02T17:15:20.467178Z")

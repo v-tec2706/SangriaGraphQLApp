@@ -1,13 +1,12 @@
 package benchmark.repository
 
+import benchmark.Execution.ex
 import benchmark.data.model.PostDb
 import benchmark.data.model.PostDb.PostRecord
 import benchmark.entities.Post
 import slick.dbio
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class PostRepository() extends Repository[PostRecord, PostDb, Post] {
   override def table: H2Profile.api.TableQuery[PostDb] = PostDb.table

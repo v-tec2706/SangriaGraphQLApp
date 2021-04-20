@@ -1,13 +1,12 @@
 package benchmark.repository
 
+import benchmark.Execution.ex
 import benchmark.data.model.CityDb
 import benchmark.data.model.CityDb.CityRecord
 import benchmark.entities.City
 import slick.dbio
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class CityRepository() extends Repository[CityRecord, CityDb, City] {
   override def table: H2Profile.api.TableQuery[CityDb] = CityDb.table

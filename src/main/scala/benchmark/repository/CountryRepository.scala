@@ -1,13 +1,12 @@
 package benchmark.repository
 
+import benchmark.Execution.ex
 import benchmark.data.model.CountryDb
 import benchmark.data.model.CountryDb.CountryRecord
 import benchmark.entities.Country
 import slick.dbio
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class CountryRepository() extends Repository[CountryRecord, CountryDb, Country] {
   override def table: H2Profile.api.TableQuery[CountryDb] = CountryDb.table

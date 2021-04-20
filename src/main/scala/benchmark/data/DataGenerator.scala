@@ -40,13 +40,23 @@ object DataGenerator extends App {
     Entries.Country -> 10,
     Entries.City -> 50,
     Entries.Company -> 200,
-    Entries.Person -> 1000,
+    Entries.Person -> 200,
     Entries.Forum -> 100,
-    Entries.Message -> 2000,
-    Entries.Post -> 4000,
-    Entries.TagClass -> 4000,
-    Entries.Topic -> 1000,
-    Entries.University -> 200
+    Entries.Message -> 200,
+    Entries.Post -> 40,
+    Entries.TagClass -> 40,
+    Entries.Topic -> 10,
+    Entries.University -> 20
+  )
+
+  lazy val relationsSize: Map[DataGenerator.Relations.Value, Int] = Map(
+    Relations.ForumTagRelation -> 10,
+    Relations.HasMemberRelation -> 10,
+    Relations.KnowsRelation -> 50,
+    Relations.LikesRelation -> 10,
+    Relations.MessageTagRelation -> 10,
+    Relations.StudyAtRelation -> 1,
+    Relations.WorkAtRelation -> 1
   )
 
   lazy val continentInsert = Insert.relationInsert[ContinentRecord, ContinentDb](
@@ -90,18 +100,7 @@ object DataGenerator extends App {
     ForumDb.table
   )
   lazy val messageInsert = Insert.relationInsert[MessageRecord, MessageDb](
-    (1 to idRanges(Entries.Message)) map (i =>
-      (
-        i,
-        Random.between(1, idRanges(Entries.Person)),
-        Random.nextInt(idRanges(Entries.Person)),
-        s"browser-used-$i",
-        LocalDate.now().minusMonths(Random.nextInt(i)),
-        s"location-ip-${i}",
-        s"content-$i",
-        Random.nextInt(i * 1000)
-      )
-      ),
+    messagesGen(),
     MessageDb.table
   )
   lazy val postInsert = Insert.relationInsert[PostRecord, PostDb](
@@ -122,31 +121,31 @@ object DataGenerator extends App {
   )
 
   lazy val forumTagRelation = Insert.relationInsert[RelationRecord, ForumTagRelationDb](
-    generateRelation(idRanges(Entries.Forum), idRanges(Entries.TagClass)),
+    generateRelation(idRanges(Entries.Forum), idRanges(Entries.TagClass), relationsSize(Relations.ForumTagRelation)),
     ForumTagRelationDb.table
   )
   lazy val hasMemberRelation = Insert.relationInsert[RelationRecord, HasMemberRelationDb](
-    generateRelation(idRanges(Entries.Forum), idRanges(Entries.Person)),
+    generateRelation(idRanges(Entries.Forum), idRanges(Entries.Person), relationsSize(Relations.HasMemberRelation)),
     HasMemberRelationDb.table
   )
   lazy val knowsRelation = Insert.relationInsert[RelationRecord, KnowsRelationDb](
-    generateRelation(idRanges(Entries.Person), idRanges(Entries.Person)),
+    generateRelation(idRanges(Entries.Person), idRanges(Entries.Person), relationsSize(Relations.KnowsRelation)),
     KnowsRelationDb.table
   )
   lazy val likesRelation = Insert.relationInsert[RelationRecord, LikesRelationDb](
-    generateRelation(idRanges(Entries.Person), idRanges(Entries.Message)),
+    generateRelation(idRanges(Entries.Person), idRanges(Entries.Message), relationsSize(Relations.LikesRelation)),
     LikesRelationDb.table
   )
   lazy val messageTagRelation = Insert.relationInsert[RelationRecord, MessageTagRelationDb](
-    generateRelation(idRanges(Entries.Message), idRanges(Entries.TagClass)),
+    generateRelation(idRanges(Entries.Message), idRanges(Entries.TagClass), relationsSize(Relations.MessageTagRelation)),
     MessageTagRelationDb.table
   )
   lazy val studyAtRelation = Insert.relationInsert[RelationRecord, StudyAtRelationDb](
-    generateRelation(idRanges(Entries.Person), idRanges(Entries.University)),
+    generateRelation(idRanges(Entries.Person), idRanges(Entries.University), relationsSize(Relations.StudyAtRelation)),
     StudyAtRelationDb.table
   )
   lazy val workAtRelation = Insert.relationInsert[(Long, Long, LocalDate), WorkAtRelationDb](
-    generateRelation(idRanges(Entries.Person), idRanges(Entries.Company)).map(x =>
+    generateRelation(idRanges(Entries.Person), idRanges(Entries.Company), relationsSize(Relations.WorkAtRelation)).map(x =>
       (x._1, x._2, LocalDate.now().minusMonths(Random.nextInt(100)))
     ),
     WorkAtRelationDb.table
@@ -183,8 +182,26 @@ object DataGenerator extends App {
     case Failure(exception) => println(s"Failure: $exception")
   }
 
-  def generateRelation(maxA: Int, maxB: Int): Seq[(Long, Long)] =
-    Random.shuffle((1 to maxA).map(i => (i.asInstanceOf[Long], Random.nextLong(maxB))))
+  def generateRelation(maxA: Int, maxB: Int, n: Int = 1): Seq[(Long, Long)] =
+    (1 to maxA).flatMap(i => (1 to n).map(_ => i.toLong).zip(Random.shuffle((1 to maxB).toList).take(n).map(_.toLong)))
+
+  def messagesGen() = {
+    val values = (1 to idRanges(Entries.Person)).flatMap(i => {
+      (1 to idRanges(Entries.Message)).map(_ =>
+        (
+          Random.between(1, idRanges(Entries.Country)).toLong,
+          i.toLong,
+          s"browser-used-${Random.nextInt(1000)}",
+          LocalDate.now().minusMonths(Random.nextInt(i)),
+          s"location-ip-${Random.nextInt(1000)}",
+          s"content-${Random.nextInt(1000)}",
+          Random.nextInt(i * 1000)
+        )
+      )
+    })
+    val ids = (1 to idRanges(Entries.Person) * idRanges(Entries.Country)).toList.map(_.toLong)
+    ids.zip(values).map(x => (x._1, x._2._1, x._2._2, x._2._3, x._2._4, x._2._5, x._2._6, x._2._7))
+  }
 
   object Entries extends Enumeration {
     type Entry = Value
@@ -192,4 +209,10 @@ object DataGenerator extends App {
   }
 
   Await.ready(insertQuery, Duration.Inf)
+
+  object Relations extends Enumeration {
+    type Relation = Value
+    val ForumTagRelation, HasMemberRelation, KnowsRelation, LikesRelation, MessageTagRelation, StudyAtRelation, WorkAtRelation = Value
+  }
+
 }

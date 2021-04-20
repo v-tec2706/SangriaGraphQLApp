@@ -1,13 +1,12 @@
 package benchmark.repository
 
+import benchmark.Execution.ex
 import benchmark.data.model.MessageDb
 import benchmark.data.model.MessageDb.MessageRecord
 import benchmark.entities.Message
 import slick.dbio
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class MessageRepository() extends Repository[MessageRecord, MessageDb, Message] {
   override def table: H2Profile.api.TableQuery[MessageDb] = MessageDb.table

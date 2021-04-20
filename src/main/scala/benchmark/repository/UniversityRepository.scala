@@ -1,5 +1,6 @@
 package benchmark.repository
 
+import benchmark.Execution.ex
 import benchmark.data.model.UniversityDb.UniversityRecord
 import benchmark.data.model.{StudyAtRelationDb, UniversityDb}
 import benchmark.entities.University
@@ -8,8 +9,6 @@ import slick.dbio.Effect
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
 import slick.sql.FixedSqlStreamingAction
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class UniversityRepository() extends Repository[UniversityRecord, UniversityDb, University] {
   override def entityMapping: UniversityRecord => University = p => University(p._1, p._2, p._3, p._4)

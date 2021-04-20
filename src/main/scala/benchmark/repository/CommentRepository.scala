@@ -1,13 +1,12 @@
 package benchmark.repository
 
+import benchmark.Execution.ex
 import benchmark.data.model.CommentDb
 import benchmark.data.model.CommentDb.CommentRecord
 import benchmark.entities.Comment
 import slick.dbio
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class CommentRepository() extends Repository[CommentRecord, CommentDb, Comment] {
   override def table: H2Profile.api.TableQuery[CommentDb] = CommentDb.table

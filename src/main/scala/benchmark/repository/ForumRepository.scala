@@ -1,13 +1,12 @@
 package benchmark.repository
 
+import benchmark.Execution.ex
 import benchmark.data.model.ForumDb
 import benchmark.data.model.ForumDb.ForumRecord
 import benchmark.entities.Forum
 import slick.dbio
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class ForumRepository() extends Repository[ForumRecord, ForumDb, Forum] {
   override def table: H2Profile.api.TableQuery[ForumDb] = ForumDb.table

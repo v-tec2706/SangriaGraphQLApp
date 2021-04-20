@@ -1,5 +1,6 @@
 package benchmark.repository
 
+import benchmark.Execution.ex
 import benchmark.data.model.PersonDb.PersonRecord
 import benchmark.data.model.{KnowsRelationDb, PersonDb}
 import benchmark.entities.Person
@@ -7,8 +8,6 @@ import slick.dbio
 import slick.dbio.Effect
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class PersonRepository() extends Repository[PersonRecord, PersonDb, Person] {
   def getPerson(id: Long): dbio.DBIO[Seq[Person]] = get { p: PersonDb => p.id === id }.map(_.map(entity))

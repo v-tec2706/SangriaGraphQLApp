@@ -5,9 +5,8 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.util.ByteString
 import benchmark.BenchmarkQueries.Strategies
-import io.circe.Json
-import io.circe.parser._
 import io.circe.syntax.EncoderOps
+import io.circe.{Json, ParsingFailure}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
@@ -34,7 +33,7 @@ case class HttpClient() {
 object HttpClient extends App {
 
   private lazy val httpClient = HttpClient()
-  val res = sendGraphQLRequest("8081", benchmark.BenchmarkQueries.q1(Strategies.Async))
+  val res = sendGraphQLRequest("8081", benchmark.BenchmarkQueries.q1(Strategies.Batched).body)
     .map(response => handleResponse(response, "q1", "async"))
 
   def sendGraphQLRequest(port: String, data: String): Future[Json] = {
@@ -43,7 +42,7 @@ object HttpClient extends App {
   }
 
   def handleResponse(response: Json, queryName: String, strategy: String): String = {
-    val resJson = response.asString.map(parse)
+    val resJson: Option[Either[ParsingFailure, Json]] = Some(Right(response))
     val isError = resJson.map(x => x.map(_.hcursor.downField("errors").focus)).flatMap(_.toOption.flatten).isDefined
     val tracing = resJson.map(_.map(_.hcursor.downField("extensions").downField("tracing").focus)).flatMap(_.toOption)
     val totalTime: String =
@@ -62,7 +61,7 @@ object HttpClient extends App {
       .map(l =>
         l.map(r =>
           (
-            r._1.flatMap(_.hcursor.values).map(_.map(_.asString).flatten.mkString("->")).getOrElse(""),
+            r._1.flatMap(_.hcursor.values).map(_.map(_.asString).flatten.mkString(",")).getOrElse(""),
             r._2.map(_.toString()).getOrElse("")
           )
         )
@@ -70,9 +69,12 @@ object HttpClient extends App {
       .getOrElse(List.empty)
 
     if (!isError) {
-      s"query: $queryName, strategy: $strategy\n" +
-        totalTime + "\n" +
-        allFields.toList.sortWith(_._2.toLong > _._2.toLong).take(10).mkString("\n") + "\n"
+      //      s"query: $queryName, strategy: $strategy\n" +
+      s"total time: $totalTime \n" +
+        allFields.toList
+          .sortWith(_._2.toLong > _._2.toLong)
+          .map { case (s1, s2) => s"$s1: $s2" }
+          .mkString("\n") + "\n"
     } else "Execution failed"
   }
 

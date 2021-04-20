@@ -1,13 +1,12 @@
 package benchmark.repository
 
+import benchmark.Execution.ex
 import benchmark.data.model.ContinentDb
 import benchmark.data.model.ContinentDb.ContinentRecord
 import benchmark.entities.Continent
 import slick.dbio
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class ContinentRepository() extends Repository[ContinentRecord, ContinentDb, Continent] {
   override def table: H2Profile.api.TableQuery[ContinentDb] = ContinentDb.table

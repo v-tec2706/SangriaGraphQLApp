@@ -1,6 +1,8 @@
 package benchmark.resolver
 
-import benchmark.Execution._
+//import benchmark.Execution._
+
+import benchmark.Execution.ex
 import benchmark.entities.University
 import benchmark.repository.{Repository, UniversityRepository}
 import sangria.execution.deferred._

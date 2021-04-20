@@ -5,6 +5,8 @@ import benchmark.resolver.MainResolver
 import sangria.execution.deferred.DeferredResolver
 import sangria.schema.Schema
 
+import java.io.{BufferedWriter, File, FileWriter}
+
 object Utils {
   def resolveStrategy(args: Array[String]): Option[Strategies.Strategy] = args.toList match {
     case List(s) => Some(resolveStrategy(s))
@@ -31,5 +33,12 @@ object Utils {
     case Strategies.Batched => Some(api.batch.QueriesSchema.batchedResolvers)
     case Strategies.Cached => Some(api.cache.QueriesSchema.cachedResolvers)
     case Strategies.BatchedCached => Some(api.batchcache.QueriesSchema.batchedCachedResolvers)
+  }
+
+  def saveToFile(text: String, queryId: String, strategyName: String, path: String = s"results/%s/log-%s.txt"): Unit = {
+    val file = new File(path.format(queryId, strategyName))
+    val bw = new BufferedWriter(new FileWriter(file, true))
+    bw.write(text)
+    bw.close()
   }
 }

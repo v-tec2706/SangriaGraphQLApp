@@ -1,13 +1,12 @@
 package benchmark.repository
 
+import benchmark.Execution.ex
 import benchmark.data.model.TagClassDb
 import benchmark.data.model.TagClassDb.TagClassRecord
 import benchmark.entities.TagClass
 import slick.dbio
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class TagClassRepository() extends Repository[TagClassRecord, TagClassDb, TagClass] {
   override def table: H2Profile.api.TableQuery[TagClassDb] = TagClassDb.table

@@ -1,5 +1,6 @@
 package benchmark.repository
 
+import benchmark.Execution.ex
 import benchmark.data.model.CompanyDb.CompanyRecord
 import benchmark.data.model.{CompanyDb, WorkAtRelationDb}
 import benchmark.entities.Company
@@ -10,7 +11,6 @@ import slick.jdbc.H2Profile.api._
 import slick.sql.FixedSqlStreamingAction
 
 import java.time.LocalDate
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class CompanyRepository() extends Repository[CompanyRecord, CompanyDb, Company] {
   override def table: H2Profile.api.TableQuery[CompanyDb] = CompanyDb.table
