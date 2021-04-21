@@ -32,19 +32,19 @@ object Run extends App {
   val executor = ExecutorProvider.provide(strategyToUse)
   val queryToUse = BenchmarkQueries.q1(strategyToUse)
 
-  //  (1 to 10).map(_ => {
-  val res = executor
-    .parseQuery(queryToUse.body)
-    .map(executor.executeQuery)
-    .map(_.map(handleResponse(_, queryToUse.name, strategyToUse.toString)))
+  (1 to 10).map(_ => {
+    val res = executor
+      .parseQuery(queryToUse.body)
+      .map(executor.executeQuery)
+      .map(_.map(handleResponse(_, queryToUse.name, strategyToUse.toString)))
 
-  res.toOption.map(
-    _.onComplete {
-      case Success(value) => println(value); saveToFile(value, queryToUse.name, strategyToUse.toString); stop()
-      case Failure(exception) => println(s"Error occurred: $exception"); stop()
-    }
-  )
-  //  })
+    res.toOption.map(
+      _.onComplete {
+        case Success(value) => println(value); saveToFile(value, queryToUse.name, strategyToUse.toString); stop()
+        case Failure(exception) => println(s"Error occurred: $exception"); stop()
+      }
+    )
+  })
 
   def processResult: (String, Json) => Unit = (name, res) => {
     println(res)
