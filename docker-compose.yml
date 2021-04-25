@@ -1,7 +1,7 @@
 version: '3.4'
 services:
   asyncserver:
-    image: benchmark:latest
+    image: wsoczek:latest
     environment:
       - BENCHMARK_DB=postgres
     entrypoint: java -cp SangriaGraphQLApp-assembly-0.1.jar benchmark.federation.GraphQL

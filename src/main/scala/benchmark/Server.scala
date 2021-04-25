@@ -5,7 +5,6 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
-import benchmark.BenchmarkQueries.Strategies
 import benchmark.BenchmarkQueries.Strategies.Strategy
 import benchmark.SangriaAkkaHttp._
 import benchmark.Server.corsHandler
@@ -60,7 +59,7 @@ object Server extends App with CorsSupport {
         | Usage: <strategy name> <portNumber>""".stripMargin)
   }
 
-  val strategyToUse = resolveStrategy(args).getOrElse(Strategies.Async)
+  val (strategyToUse, _) = resolveStrategy(args)
   val executor: Execution = ExecutorProvider.provide(strategyToUse)
 
   Server(strategyToUse, port, executor).start

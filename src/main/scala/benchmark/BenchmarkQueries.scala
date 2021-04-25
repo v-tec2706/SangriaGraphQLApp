@@ -106,7 +106,7 @@ object BenchmarkQueries {
       "q3",
       s"""
       query q3 {
-        person$strategy(id: 780) {
+        person$strategy(id: 20) {
            knows {
              id
              messages {

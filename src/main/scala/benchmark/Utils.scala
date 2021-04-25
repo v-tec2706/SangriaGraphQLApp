@@ -1,6 +1,7 @@
 package benchmark
 
-import benchmark.BenchmarkQueries.Strategies
+import benchmark.BenchmarkQueries.Strategies.{Async, Strategy}
+import benchmark.BenchmarkQueries.{Query, Strategies, all, q1}
 import benchmark.resolver.MainResolver
 import sangria.execution.deferred.DeferredResolver
 import sangria.schema.Schema
@@ -8,9 +9,9 @@ import sangria.schema.Schema
 import java.io.{BufferedWriter, File, FileWriter}
 
 object Utils {
-  def resolveStrategy(args: Array[String]): Option[Strategies.Strategy] = args.toList match {
-    case List(s) => Some(resolveStrategy(s))
-    case _ => None
+  def resolveStrategy(args: Array[String]): (Strategy, Query) = args.toList match {
+    case List(s, q) => val strategy = resolveStrategy(s); (strategy, resolveQuery(q)(strategy))
+    case _ => (Async, q1(Async))
   }
 
   def resolveStrategy(arg: String): Strategies.Strategy = arg.toLowerCase match {
@@ -20,6 +21,8 @@ object Utils {
     case "batchedcached" => Strategies.BatchedCached
     case _ => println("Unknown strategy, using default"); Strategies.Async
   }
+
+  def resolveQuery(q: String): Strategy => Query = s => all(s).find(_.name == q).getOrElse(q1(s))
 
   def resolveSchema(strategy: Strategies.Strategy): Schema[MainResolver, Unit] = strategy match {
     case Strategies.Async => api.async.QueriesSchema.asyncSchema

@@ -5,3 +5,4 @@
 /results
 /gateway/node_modules
 /gateway/package-lock.json
+/aws/auth.sh
