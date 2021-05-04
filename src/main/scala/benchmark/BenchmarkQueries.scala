@@ -85,10 +85,10 @@ object BenchmarkQueries {
       "q2",
       s"""
       query q2 {
-        personWithArgs$strategy(id: 100) {
+        personWithArgs$strategy(id: 1) {
           firstName
           lastName
-          knows(year: 2000, country: "country-5") {
+          knows(year: 2000, country: "country-4") {
            id
           }
          }
@@ -127,7 +127,7 @@ object BenchmarkQueries {
       "q4",
       s"""
       query q4 {
-        person$strategy(id: 780) {
+        person$strategy(id: 20) {
            knows {
              knows {
                id
@@ -150,7 +150,7 @@ object BenchmarkQueries {
       "q5",
       s"""
       query q5 {
-        person$strategy(id: 780) {
+        person$strategy(id: 20) {
           firstName
           knows {
             messages {
@@ -185,7 +185,7 @@ Test: check overhead of the resolver
       "q6",
       s"""
       query q6 {
-        person$strategy(id: 780) {
+        person$strategy(id: 20) {
           firstName
           lastName
           gender

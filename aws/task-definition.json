@@ -1,0 +1,152 @@
+{
+  "family": "benchmark-task",
+  "networkMode": "awsvpc",
+  "executionRoleArn": "arn:aws:iam::841957747737:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "benchmark-app-async",
+      "image": "841957747737.dkr.ecr.us-east-1.amazonaws.com/benchmark",
+      "portMappings": [
+        {
+          "containerPort": 8081,
+          "hostPort": 8081,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "workingDirectory": "/",
+      "environment": [
+        {
+          "name": "port",
+          "value": "8081"
+        },
+        {
+          "name": "strategy",
+          "value": "async"
+        },
+        {
+          "name": "BENCHMARK_DB",
+          "value": "database-2.csbp0mo0xqv0.us-east-1.rds.amazonaws.com"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "benchmark-logs",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "benchmark-batched"
+        }
+      }
+    },
+    {
+      "name": "benchmark-app-batched",
+      "image": "841957747737.dkr.ecr.us-east-1.amazonaws.com/benchmark",
+      "portMappings": [
+        {
+          "containerPort": 8082,
+          "hostPort": 8082,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "workingDirectory": "/",
+      "environment": [
+        {
+          "name": "port",
+          "value": "8082"
+        },
+        {
+          "name": "strategy",
+          "value": "batched"
+        },
+        {
+          "name": "BENCHMARK_DB",
+          "value": "database-2.csbp0mo0xqv0.us-east-1.rds.amazonaws.com"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "benchmark-logs",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "benchmark-batched"
+        }
+      }
+    },
+    {
+      "name": "benchmark-app-cached",
+      "image": "841957747737.dkr.ecr.us-east-1.amazonaws.com/benchmark",
+      "portMappings": [
+        {
+          "containerPort": 8083,
+          "hostPort": 8083,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "workingDirectory": "/",
+      "environment": [
+        {
+          "name": "port",
+          "value": "8083"
+        },
+        {
+          "name": "strategy",
+          "value": "cached"
+        },
+        {
+          "name": "BENCHMARK_DB",
+          "value": "database-2.csbp0mo0xqv0.us-east-1.rds.amazonaws.com"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "benchmark-logs",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "benchmark-cached"
+        }
+      }
+    },
+    {
+      "name": "benchmark-app-cachedBatched",
+      "image": "841957747737.dkr.ecr.us-east-1.amazonaws.com/benchmark",
+      "portMappings": [
+        {
+          "containerPort": 8084,
+          "hostPort": 8084,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "workingDirectory": "/",
+      "environment": [
+        {
+          "name": "port",
+          "value": "8084"
+        },
+        {
+          "name": "strategy",
+          "value": "batchedCached"
+        },
+        {
+          "name": "BENCHMARK_DB",
+          "value": "database-2.csbp0mo0xqv0.us-east-1.rds.amazonaws.com"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "benchmark-logs",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "benchmark-batchedCached"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "1024",
+  "memory": "2048"
+}

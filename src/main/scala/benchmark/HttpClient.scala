@@ -5,8 +5,9 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.util.ByteString
 import benchmark.BenchmarkQueries.Strategies
+import io.circe.Json
+import io.circe.parser._
 import io.circe.syntax.EncoderOps
-import io.circe.{Json, ParsingFailure}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
@@ -33,31 +34,33 @@ case class HttpClient() {
 object HttpClient extends App {
 
   private lazy val httpClient = HttpClient()
-  val res = sendGraphQLRequest("8081", benchmark.BenchmarkQueries.q1(Strategies.Batched).body)
-    .map(response => handleResponse(response, "q1", "async"))
+  val res = sendGraphQLRequest(port = "8081", data = benchmark.BenchmarkQueries.q1(Strategies.Batched).body)
+    .map(response => response.asString.map(parse).flatMap(_.toOption).map(handleResponse(_, "q1", "async")))
 
-  def sendGraphQLRequest(port: String, data: String): Future[Json] = {
+  def sendGraphQLRequest(host: String = "localhost", port: String, data: String): Future[Json] = {
+    println(s"Sending data to $host:$port \n data: \n $data")
     val clear = data.replaceAll("\n", "").replaceAll("  ", " ")
-    httpClient.send(s"http://localhost:$port/graphql")(s"""{"query": "$clear"}""")
+    httpClient
+      .send(s"http://${host}:$port/graphql")(s"""{"query": "$clear"}""")
+      .map(s => {
+        println(s"Response is: \n ${s.toString()}");
+        s
+      })
   }
 
   def handleResponse(response: Json, queryName: String, strategy: String): String = {
-    val resJson: Option[Either[ParsingFailure, Json]] = Some(Right(response))
-    val isError = resJson.map(x => x.map(_.hcursor.downField("errors").focus)).flatMap(_.toOption.flatten).isDefined
-    val tracing = resJson.map(_.map(_.hcursor.downField("extensions").downField("tracing").focus)).flatMap(_.toOption)
+    val isError = response.hcursor.downField("errors").focus.isDefined
+    val tracing = response.hcursor.downField("extensions").downField("tracing").focus
     val totalTime: String =
-      tracing.flatMap(_.map(_.hcursor.downField("duration").focus)).flatten.map(_.toString()).getOrElse("Failed to fetch time")
+      tracing.flatMap(_.hcursor.downField("duration").focus).map(_.toString()).getOrElse("Failed to fetch time")
     val allFields = tracing
       .flatMap(
-        _.map(
-          _.hcursor
-            .downField("execution")
-            .downField("resolvers")
-            .values
-            .map(_.map(x => (x.hcursor.downField("path").focus, x.hcursor.downField("duration").focus)))
-        )
+        _.hcursor
+          .downField("execution")
+          .downField("resolvers")
+          .values
+          .map(_.map(x => (x.hcursor.downField("path").focus, x.hcursor.downField("duration").focus)))
       )
-      .flatten
       .map(l =>
         l.map(r =>
           (
@@ -69,7 +72,6 @@ object HttpClient extends App {
       .getOrElse(List.empty)
 
     if (!isError) {
-      //      s"query: $queryName, strategy: $strategy\n" +
       s"total time: $totalTime \n" +
         allFields.toList
           .sortWith(_._2.toLong > _._2.toLong)

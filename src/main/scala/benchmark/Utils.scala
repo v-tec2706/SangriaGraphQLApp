@@ -7,6 +7,7 @@ import sangria.execution.deferred.DeferredResolver
 import sangria.schema.Schema
 
 import java.io.{BufferedWriter, File, FileWriter}
+import java.nio.file.{Files, Paths}
 
 object Utils {
   def resolveStrategy(args: Array[String]): (Strategy, Query) = args.toList match {
@@ -38,8 +39,11 @@ object Utils {
     case Strategies.BatchedCached => Some(api.batchcache.QueriesSchema.batchedCachedResolvers)
   }
 
-  def saveToFile(text: String, queryId: String, strategyName: String, path: String = s"results/%s/log-%s.txt"): Unit = {
-    val file = new File(path.format(queryId, strategyName))
+  def saveToFile(text: String, queryId: String, strategyName: String, directoryName: String = s"results"): Unit = {
+    val fileName = s"log-$strategyName.txt"
+    val dirPath = directoryName + "/" + queryId
+    val directory = Files.createDirectories(Paths.get(dirPath))
+    val file = new File(dirPath + "/" + fileName)
     val bw = new BufferedWriter(new FileWriter(file, true))
     bw.write(text)
     bw.close()
