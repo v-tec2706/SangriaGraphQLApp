@@ -1,6 +1,6 @@
 package benchmark
 
-import benchmark.BenchmarkQueries.Strategies.{Async, Strategy}
+import benchmark.BenchmarkQueries.Strategies.{Async, Batched, BatchedCached, Cached, Strategy}
 import benchmark.BenchmarkQueries.{Query, Strategies, all, q1}
 import benchmark.resolver.MainResolver
 import sangria.execution.deferred.DeferredResolver
@@ -37,6 +37,13 @@ object Utils {
     case Strategies.Batched => Some(api.batch.QueriesSchema.batchedResolvers)
     case Strategies.Cached => Some(api.cache.QueriesSchema.cachedResolvers)
     case Strategies.BatchedCached => Some(api.batchcache.QueriesSchema.batchedCachedResolvers)
+  }
+
+  def resolveServicePort(strategy: Strategy): Int = strategy match {
+    case Async => 8081
+    case Batched => 8082
+    case Cached => 8083
+    case BatchedCached => 8084
   }
 
   def saveToFile(text: String, queryId: String, strategyName: String, directoryName: String = s"results"): Unit = {

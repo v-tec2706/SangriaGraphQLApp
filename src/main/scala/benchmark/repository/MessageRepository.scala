@@ -17,5 +17,8 @@ case class MessageRepository() extends Repository[MessageRecord, MessageDb, Mess
 
   def getMessages(ids: List[Long]): dbio.DBIO[Seq[Message]] = get { m: MessageDb => m.id inSet ids }.map(_.map(entity))
 
-  def getBySender(id: Long): DBIOAction[Seq[Long], NoStream, Effect.All] = get { m: MessageDb => m.personId === id }.map(_.map(_._3))
+  def getBySender(id: Long): DBIOAction[Seq[Long], NoStream, Effect.All] = get { m: MessageDb => m.personId === id }.map(_.map(_._1))
+
+  def getBySender(ids: Seq[Long]): DBIOAction[Seq[Long], NoStream, Effect.All] =
+    get { m: MessageDb => m.personId inSet ids }.map(_.map(_._1))
 }

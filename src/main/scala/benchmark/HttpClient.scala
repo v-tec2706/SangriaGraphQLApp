@@ -10,8 +10,7 @@ import io.circe.parser._
 import io.circe.syntax.EncoderOps
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 case class HttpClient() {
   implicit val system = ActorSystem()
@@ -77,8 +76,8 @@ object HttpClient extends App {
           .sortWith(_._2.toLong > _._2.toLong)
           .map { case (s1, s2) => s"$s1: $s2" }
           .mkString("\n") + "\n"
-    } else "Execution failed"
+    } else "Execution failed, error occurred"
   }
 
-  Await.result(res, 5.seconds)
+  //  Await.result(res, 5.seconds)
 }

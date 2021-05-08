@@ -4,10 +4,11 @@ import benchmark.Execution.ex
 import benchmark.api.CustomTypesSchema.GQLDate
 import benchmark.api.{Arguments, CommonEntities}
 import benchmark.entities._
-import benchmark.resolver.MessageResolver.batchedCachedMessageResolver
-import benchmark.resolver.PersonResolver.batchedCachedPersonResolver
+import benchmark.resolver.MessageResolver.{batchedCachedMessageResolver, messageBySender}
+import benchmark.resolver.PersonResolver.{batchedCachedPersonResolver, knowsRelation}
+import benchmark.resolver.UniversityResolver.universityByStudent
 import benchmark.resolver._
-import sangria.schema.{Field, IntType, ListType, ObjectType, StringType, fields}
+import sangria.schema.{Field, IntType, ListType, ObjectType, OptionType, StringType, fields}
 
 import java.time.LocalDate
 
@@ -26,24 +27,13 @@ object BatchedCachedEntities {
         Field("email", ListType(StringType), resolve = _.value.email),
         Field("speaks", ListType(StringType), resolve = _.value.speaks),
         Field("locationIP", StringType, resolve = _.value.locationIP),
-        Field(
-          "messages",
-          ListType(Message),
-          resolve = ctx => {
-            val z = ctx.ctx.messagesResolver.getBySender(ctx.value.id).map(_.toSet)
-            z.map(x => batchedCachedMessageResolver.deferSeq(x.toList))
-          }
-        ),
-        Field(
-          "knows",
-          ListType(Person),
-          resolve = ctx => ctx.ctx.personResolver.knows(ctx.value.id).map(batchedCachedPersonResolver.deferSeq)
-        ),
+        Field("messages", ListType(Message), resolve = ctx => batchedCachedMessageResolver.deferRelSeq(messageBySender, ctx.value.id)),
+        Field("knows", ListType(Person), resolve = ctx => batchedCachedPersonResolver.deferRelSeq(knowsRelation, ctx.value.id)),
         Field("city", City, resolve = ctx => CityResolver.batchedCachedCityResolver.defer(ctx.value.cityId)),
         Field(
           "university",
-          University,
-          resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id).map(UniversityResolver.batchedCachedUniversityResolver.defer)
+          OptionType(ListType(University)),
+          resolve = ctx => UniversityResolver.batchedCachedUniversityResolver.deferRelSeq(universityByStudent, ctx.value.id)
         )
       )
   )
@@ -62,11 +52,7 @@ object BatchedCachedEntities {
         Field("email", ListType(StringType), resolve = _.value.email),
         Field("speaks", ListType(StringType), resolve = _.value.speaks),
         Field("locationIP", StringType, resolve = _.value.locationIP),
-        Field(
-          "messages",
-          ListType(Message),
-          resolve = ctx => ctx.ctx.messagesResolver.getBySender(ctx.value.id).map(batchedCachedMessageResolver.deferSeq)
-        ),
+        Field("messages", ListType(Message), resolve = ctx => batchedCachedMessageResolver.deferRelSeq(messageBySender, ctx.value.id)),
         Field(
           "knows",
           ListType(Person),
@@ -89,8 +75,8 @@ object BatchedCachedEntities {
         Field("city", City, resolve = ctx => CityResolver.batchedCachedCityResolver.defer(ctx.value.cityId)),
         Field(
           "university",
-          University,
-          resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id).map(UniversityResolver.batchedCachedUniversityResolver.defer)
+          OptionType(ListType(University)),
+          resolve = ctx => UniversityResolver.batchedCachedUniversityResolver.deferRelSeq(universityByStudent, ctx.value.id)
         )
       )
   )

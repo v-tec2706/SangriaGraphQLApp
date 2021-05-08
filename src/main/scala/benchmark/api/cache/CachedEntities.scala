@@ -8,10 +8,10 @@ import benchmark.resolver.CityResolver.cachedCityResolver
 import benchmark.resolver.ContinentResolver.cachedContinentResolver
 import benchmark.resolver.CountryResolver.cachedCountryResolver
 import benchmark.resolver.MainResolver
-import benchmark.resolver.MessageResolver.cachedMessageResolver
-import benchmark.resolver.PersonResolver.cachedPersonResolver
-import benchmark.resolver.UniversityResolver.cachedUniversityResolver
-import sangria.schema.{Field, IntType, ListType, ObjectType, StringType, fields}
+import benchmark.resolver.MessageResolver.{cachedMessageResolver, messageBySender}
+import benchmark.resolver.PersonResolver.{cachedPersonResolver, knowsRelation}
+import benchmark.resolver.UniversityResolver.{cachedUniversityResolver, universityByStudent}
+import sangria.schema.{Field, IntType, ListType, ObjectType, OptionType, StringType, fields}
 
 import java.time.LocalDate
 
@@ -30,20 +30,13 @@ object CachedEntities {
         Field("email", ListType(StringType), resolve = _.value.email),
         Field("speaks", ListType(StringType), resolve = _.value.speaks),
         Field("locationIP", StringType, resolve = _.value.locationIP),
-        Field(
-          "messages",
-          ListType(Message),
-          resolve = ctx => {
-            val z = ctx.ctx.messagesResolver.getBySender(ctx.value.id).map(_.toSet)
-            z.map(x => cachedMessageResolver.deferSeq(x.toList))
-          }
-        ),
-        Field("knows", ListType(Person), resolve = ctx => ctx.ctx.personResolver.knows(ctx.value.id).map(cachedPersonResolver.deferSeq)),
+        Field("messages", ListType(Message), resolve = ctx => cachedMessageResolver.deferRelSeq(messageBySender, ctx.value.id)),
+        Field("knows", ListType(Person), resolve = ctx => cachedPersonResolver.deferRelSeq(knowsRelation, ctx.value.id)),
         Field("city", City, resolve = ctx => cachedCityResolver.defer(ctx.value.cityId)),
         Field(
           "university",
-          University,
-          resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id).map(cachedUniversityResolver.defer)
+          OptionType(ListType(University)),
+          resolve = ctx => cachedUniversityResolver.deferRelSeq(universityByStudent, ctx.value.id)
         )
       )
   )
@@ -62,11 +55,7 @@ object CachedEntities {
         Field("email", ListType(StringType), resolve = _.value.email),
         Field("speaks", ListType(StringType), resolve = _.value.speaks),
         Field("locationIP", StringType, resolve = _.value.locationIP),
-        Field(
-          "messages",
-          ListType(Message),
-          resolve = ctx => ctx.ctx.messagesResolver.getBySender(ctx.value.id).map(cachedMessageResolver.deferSeq)
-        ),
+        Field("messages", ListType(Message), resolve = ctx => cachedMessageResolver.deferRelSeq(messageBySender, ctx.value.id)),
         Field(
           "knows",
           ListType(Person),
@@ -89,8 +78,8 @@ object CachedEntities {
         Field("city", City, resolve = ctx => cachedCityResolver.defer(ctx.value.cityId)),
         Field(
           "university",
-          University,
-          resolve = ctx => ctx.ctx.universityResolver.byStudent(ctx.value.id).map(cachedUniversityResolver.defer)
+          OptionType(ListType(University)),
+          resolve = ctx => cachedUniversityResolver.deferRelSeq(universityByStudent, ctx.value.id)
         )
       )
   )

@@ -8,6 +8,7 @@ import slick.dbio
 import slick.dbio.Effect
 import slick.jdbc.H2Profile
 import slick.jdbc.H2Profile.api._
+import slick.sql.FixedSqlStreamingAction
 
 case class PersonRepository() extends Repository[PersonRecord, PersonDb, Person] {
   def getPerson(id: Long): dbio.DBIO[Seq[Person]] = get { p: PersonDb => p.id === id }.map(_.map(entity))
@@ -16,8 +17,11 @@ case class PersonRepository() extends Repository[PersonRecord, PersonDb, Person]
 
   def getPeople(ids: List[Long]): dbio.DBIO[Seq[Person]] = get { p: PersonDb => p.id inSet ids }.map(_.map(entity))
 
-  def knows(personId: Long): DBIOAction[Seq[Long], NoStream, Effect.Read] =
-    KnowsRelationDb.table.filter(_.personId === personId).map(_.friendId).result
+  def knows(personId: Long): FixedSqlStreamingAction[Seq[(Long, Long)], (Long, Long), Effect.Read] =
+    KnowsRelationDb.table.filter(_.personId === personId).map(knowsRel => (knowsRel.personId, knowsRel.friendId)).result
+
+  def manyKnows(personId: List[Long]): FixedSqlStreamingAction[Seq[(Long, Long)], (Long, Long), Effect.Read] =
+    KnowsRelationDb.table.filter(_.personId inSet personId).map(knowsRel => (knowsRel.personId, knowsRel.friendId)).result
 
   override def table: H2Profile.api.TableQuery[PersonDb] = PersonDb.table
 

@@ -53,7 +53,7 @@ object AsyncEntities {
           resolve = ctx =>
             for {
               universityId <- ctx.ctx.universityResolver.byStudent(ctx.value.id)
-              university <- ctx.ctx.universityResolver.getUniversity(universityId)
+              university <- ctx.ctx.universityResolver.getUniversity(universityId._2)
             } yield university
         )
       )
@@ -110,7 +110,7 @@ object AsyncEntities {
           resolve = ctx =>
             for {
               universityId <- ctx.ctx.universityResolver.byStudent(ctx.value.id)
-              university <- ctx.ctx.universityResolver.getUniversity(universityId)
+              university <- ctx.ctx.universityResolver.getUniversity(universityId._2)
             } yield university
         )
       )

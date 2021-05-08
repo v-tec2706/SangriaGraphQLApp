@@ -39,25 +39,25 @@ object DataGenerator extends App {
     Entries.Continent -> 5,
     Entries.Country -> 10,
     Entries.City -> 50,
-    Entries.Company -> 200,
-    Entries.Person -> 300,
-    Entries.Forum -> 100,
-    Entries.Message -> 300,
+    Entries.Company -> 20,
+    Entries.Person -> 30,
+    Entries.Forum -> 30,
+    Entries.Message -> 30,
     Entries.Post -> 40,
     Entries.TagClass -> 40,
     Entries.Topic -> 10,
     Entries.University -> 20
   )
-
   lazy val relationsSize: Map[DataGenerator.Relations.Value, Int] = Map(
     Relations.ForumTagRelation -> 10,
     Relations.HasMemberRelation -> 10,
-    Relations.KnowsRelation -> 50,
+    Relations.KnowsRelation -> 20,
     Relations.LikesRelation -> 10,
     Relations.MessageTagRelation -> 10,
     Relations.StudyAtRelation -> 1,
     Relations.WorkAtRelation -> 1
   )
+  val scalingFactor = 0.1
 
   lazy val continentInsert = Insert.relationInsert[ContinentRecord, ContinentDb](
     (1 to idRanges(Entries.Continent)) map (i => (i, s"continent-${i}", s"url-${i}")),
